@@ -1,4 +1,4 @@
-// Royalty Concrete & Remodeling Services LLC — Miami, FL — Mockup
+// Macias Multy Services LLC — Miami, FL
 
 
 import React, { useState, useEffect } from "react";
@@ -11,28 +11,28 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const queryClient = new QueryClient();
 
 const SERVICES = [
-  { name: "Concrete Driveways", desc: "Custom concrete driveways built to last. From new pours to full replacements, we deliver a smooth, durable finish that boosts your home's curb appeal and value." },
-  { name: "Patios & Walkways", desc: "Transform your outdoor space with beautifully crafted patios and walkways. Choose from classic finishes or stamped designs to fit your style." },
-  { name: "Foundations & Slabs", desc: "Solid, code-compliant concrete foundations and slabs for homes, additions, garages, and commercial projects. Built right from the ground up." },
-  { name: "Stamped & Decorative Concrete", desc: "Add character to your property with stamped, stained, and decorative concrete. Get the look of brick, stone, or tile at a fraction of the cost." },
-  { name: "Concrete Repair & Resurfacing", desc: "Cracked, uneven, or worn-out concrete? We repair, resurface, and restore old slabs to look new again — saving you the cost of full replacement." },
-  { name: "Home Remodeling", desc: "Full-service remodeling for kitchens, bathrooms, and interiors. Our team handles every detail, delivering quality craftsmanship and clean finishes." },
+  { name: "Fence Installation", desc: "New fence installations for residential and commercial properties. We work with wood, vinyl, chain link, aluminum, and more — built to last in Florida's climate." },
+  { name: "Fence Repair", desc: "Damaged, leaning, or rotting fence? We fix it fast. From broken posts and rails to full panel replacements, we restore your fence to like-new condition." },
+  { name: "Wood Fencing", desc: "Beautiful custom wood fences that add privacy and curb appeal. We use quality treated lumber and expert craftsmanship for a fence that looks great for years." },
+  { name: "Vinyl & PVC Fencing", desc: "Low-maintenance vinyl fences in a variety of styles and colors. Durable, weather-resistant, and perfect for South Florida's heat and humidity." },
+  { name: "Chain Link Fencing", desc: "Affordable and durable chain link fences for residential, commercial, and security applications. Quick installation with long-lasting results." },
+  { name: "Gate Installation & Repair", desc: "We install and repair manual and automatic gates for driveways and entrances. Secure, smooth operation — done right the first time." },
 ];
 
 const REVIEWS = [
   {
-    text: "Royalty Concrete poured a new driveway and walkway for us in Miami and it came out beautiful. The team was professional, the work was clean, and they finished on schedule. Very happy with the results.",
-    author: "Carlos M.",
+    text: "Macias Multy Services did an amazing job replacing our old wooden fence. They were on time, professional, and the finished product looks incredible. Definitely recommend them to anyone in Miami.",
+    author: "Roberto G.",
     source: "Google Review"
   },
   {
-    text: "Hired them for a full patio remodel with stamped concrete. The crew showed up when they said they would and the finished work looks amazing. Fair pricing for the quality.",
-    author: "Jessica R.",
+    text: "Called them for an emergency fence repair after a storm knocked part of it down. They came out the same day and had it fixed quickly. Great price and great service — 5 stars all the way.",
+    author: "Maria S.",
     source: "Google Review"
   },
   {
-    text: "Royalty handled both our foundation repair and bathroom remodel. Honest, hardworking team that takes pride in what they do. Would absolutely hire them again.",
-    author: "David L.",
+    text: "Had them install a full vinyl privacy fence around our backyard. The crew was clean, respectful, and finished ahead of schedule. Our neighbors already asked for their number!",
+    author: "James T.",
     source: "Google Review"
   }
 ];
@@ -72,8 +72,8 @@ function LandingPage() {
               <Hammer className="text-white w-6 h-6" />
             </div>
             <div>
-              <div className="font-condensed text-2xl font-bold leading-none tracking-wider text-white uppercase">Royalty Concrete & Remodeling</div>
-              <div className="font-condensed text-primary text-sm font-bold tracking-widest uppercase leading-none">Concrete & Remodeling</div>
+              <div className="font-condensed text-2xl font-bold leading-none tracking-wider text-white uppercase">Macias Multy Services</div>
+              <div className="font-condensed text-primary text-sm font-bold tracking-widest uppercase leading-none">Fence Contractor · Miami, FL</div>
             </div>
           </div>
 
@@ -82,9 +82,9 @@ function LandingPage() {
             <button onClick={() => scrollTo('services')} className="font-condensed text-lg uppercase tracking-wide hover:text-primary transition-colors">Services</button>
             <button onClick={() => scrollTo('about')} className="font-condensed text-lg uppercase tracking-wide hover:text-primary transition-colors">About</button>
             <button onClick={() => scrollTo('reviews')} className="font-condensed text-lg uppercase tracking-wide hover:text-primary transition-colors">Reviews</button>
-            <a href="tel:+17867886001" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded font-condensed text-xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1 shadow-[0_0_20px_rgba(238,90,68,0.3)]">
+            <a href="tel:+17869298933" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded font-condensed text-xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1 shadow-[0_0_20px_rgba(238,90,68,0.3)]">
               <PhoneCall className="w-5 h-5" />
-              (786) 788-6001
+              (786) 929-8933
             </a>
           </div>
 
@@ -102,9 +102,9 @@ function LandingPage() {
           <button onClick={() => scrollTo('about')} className="font-condensed text-3xl uppercase tracking-wide text-left border-b border-white/10 pb-4">About</button>
           <button onClick={() => scrollTo('reviews')} className="font-condensed text-3xl uppercase tracking-wide text-left border-b border-white/10 pb-4">Reviews</button>
           <button onClick={() => scrollTo('contact')} className="font-condensed text-3xl uppercase tracking-wide text-left border-b border-white/10 pb-4">Contact</button>
-          <a href="tel:+17867886001" className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-4 rounded font-condensed text-2xl uppercase tracking-wider font-bold mt-4">
+          <a href="tel:+17869298933" className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-4 rounded font-condensed text-2xl uppercase tracking-wider font-bold mt-4">
             <PhoneCall className="w-6 h-6" />
-            (786) 788-6001
+            (786) 929-8933
           </a>
         </div>
       )}
@@ -112,7 +112,7 @@ function LandingPage() {
       {/* Hero Section */}
       <section id="hero" className="relative min-h-[90vh] flex items-center pt-20">
         <div className="absolute inset-0 z-0">
-          <img src="/hero-bg.png" alt="Trades professional working" className="w-full h-full object-cover opacity-40" />
+          <img src="/hero-bg.png" alt="Fence installation professional working in Florida" className="w-full h-full object-cover opacity-40" />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
         </div>
@@ -120,22 +120,22 @@ function LandingPage() {
         <div className="container mx-auto px-6 relative z-10 py-20">
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-condensed uppercase tracking-tight leading-[0.9] mb-6">
-              Built To <br/>
-              <span className="text-primary">Last A Lifetime</span>
+              Fences Built <br/>
+              <span className="text-primary">To Stand Strong</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed">
-              From custom driveways and patios to full home remodels — Royalty Concrete & Remodeling brings expert craftsmanship to every project across Miami and Miami-Dade County. Quality work, honest pricing, on time.
+              Expert fence installation and repair across Miami and South Florida. From wood and vinyl to chain link and gates — Macias Multy Services delivers quality fencing on time and on budget.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href="tel:+17867886001" className="flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded font-condensed text-2xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1 shadow-[0_0_30px_rgba(238,90,68,0.4)]">
+              <a href="tel:+17869298933" className="flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded font-condensed text-2xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1 shadow-[0_0_30px_rgba(238,90,68,0.4)]">
                 <PhoneCall className="w-6 h-6" />
-                Call (786) 788-6001
+                Call (786) 929-8933
               </a>
               <button onClick={() => scrollTo('contact')} className="flex items-center justify-center gap-3 bg-card hover:bg-card/80 border border-white/10 text-white px-8 py-4 rounded font-condensed text-2xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1">
-                Book Service
+                Get a Free Quote
               </button>
             </div>
-            {/* Trust Badges — no numbers required, works for any new business */}
+            {/* Trust Badges */}
             <div className="mt-12 flex flex-wrap items-center gap-6">
               <div className="flex items-center gap-2 font-condensed font-bold text-lg uppercase tracking-wide">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -155,7 +155,7 @@ function LandingPage() {
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
                   <Zap className="w-4 h-4" />
                 </div>
-                Fast Response Time
+                Available 24/7
               </div>
             </div>
           </div>
@@ -196,8 +196,7 @@ function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
               <div className="absolute -inset-4 border border-primary/20 rounded translate-x-4 translate-y-4"></div>
-              <img src="/team-photo.jpg" alt="Royalty Concrete & Remodeling pool patio project in Miami" className="w-full h-auto rounded relative z-10 hover:scale-[1.02] transition-all duration-500" />
-              {/* Years badge — only renders if YEARS_IN_BUSINESS is set to a real non-zero value */}
+              <img src="/team-photo.png" alt="Macias Multy Services fence installation project in Miami" className="w-full h-auto rounded relative z-10 hover:scale-[1.02] transition-all duration-500" />
               {showYearsBadge && (
                 <div className="absolute bottom-8 -right-8 bg-primary p-6 rounded shadow-2xl z-20 hidden md:block">
                   <div className="font-condensed text-5xl font-black text-white leading-none mb-1">{YEARS_IN_BUSINESS}+</div>
@@ -209,12 +208,12 @@ function LandingPage() {
               <h2 className="text-primary font-bold tracking-widest uppercase mb-4 text-sm flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4" /> About Us
               </h2>
-              <h3 className="text-4xl md:text-6xl font-condensed font-bold uppercase tracking-wide mb-6 leading-tight">We Don't Cut Corners. <br/>We Pour Them Right.</h3>
+              <h3 className="text-4xl md:text-6xl font-condensed font-bold uppercase tracking-wide mb-6 leading-tight">We Build Fences That Last.</h3>
               <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                Royalty Concrete & Remodeling Services LLC has been transforming Miami homes and businesses with quality concrete and remodeling work. Based in the heart of Miami, we serve homeowners, contractors, and commercial clients throughout Miami-Dade County.
+                Macias Multy Services LLC is a trusted fence contractor serving Miami and South Florida. We specialize in residential and commercial fence installation, repair, and gate work — handling every job with precision and care.
               </p>
               <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-                From driveways, patios, and foundations to kitchen and bathroom remodels — every project gets the same attention to detail. We show up on time, communicate clearly, and finish what we start.
+                Whether you need a new privacy fence, a quick repair after storm damage, or a custom gate for your driveway — our team shows up on time, works clean, and delivers results you'll be proud of.
               </p>
               
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
@@ -228,7 +227,7 @@ function LandingPage() {
                 ))}
               </ul>
               
-              <a href="tel:+17867886001" className="inline-flex items-center gap-2 bg-white text-background hover:bg-white/90 px-8 py-4 rounded font-condensed text-xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1">
+              <a href="tel:+17869298933" className="inline-flex items-center gap-2 bg-white text-background hover:bg-white/90 px-8 py-4 rounded font-condensed text-xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1">
                 Call Us Now <ArrowRight className="w-5 h-5" />
               </a>
             </div>
@@ -240,17 +239,16 @@ function LandingPage() {
       <section className="py-20 relative overflow-hidden bg-primary">
         <div className="absolute inset-0 bg-[url('/services-bg.png')] opacity-10 object-cover bg-center mix-blend-overlay"></div>
         <div className="container mx-auto px-6 relative z-10 text-center">
-          <h2 className="text-4xl md:text-6xl font-condensed font-black uppercase tracking-wide text-white mb-6">Ready to Build Something Great?</h2>
-          <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto font-medium">Get a free quote today. Whether it's a new driveway, a backyard patio, or a full remodel — we'll handle it from start to finish.</p>
-          <a href="tel:+17867886001" className="inline-flex items-center justify-center gap-3 bg-background hover:bg-background/90 text-white px-10 py-5 rounded font-condensed text-3xl uppercase tracking-wider font-black transition-all hover:scale-105 shadow-2xl">
+          <h2 className="text-4xl md:text-6xl font-condensed font-black uppercase tracking-wide text-white mb-6">Need a Fence? We've Got You.</h2>
+          <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto font-medium">Get a free quote today. Installation, repair, or gates — we handle it all across Miami and South Florida. Available 24 hours a day.</p>
+          <a href="tel:+17869298933" className="inline-flex items-center justify-center gap-3 bg-background hover:bg-background/90 text-white px-10 py-5 rounded font-condensed text-3xl uppercase tracking-wider font-black transition-all hover:scale-105 shadow-2xl">
             <PhoneCall className="w-8 h-8 text-primary" />
-            (786) 788-6001
+            (786) 929-8933
           </a>
         </div>
       </section>
 
       {/* Reviews Section */}
-      {/* DELETE THIS ENTIRE SECTION (and the Reviews nav link above) if client has no reviews yet */}
       <section id="reviews" className="py-24 bg-background relative">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -285,35 +283,26 @@ function LandingPage() {
               <PhoneCall className="w-4 h-4" /> Get In Touch
             </h2>
             <h3 className="text-4xl md:text-6xl font-condensed font-bold uppercase tracking-wide mb-4">Ready to Help, Right Now</h3>
-            <p className="text-muted-foreground text-lg">Call, text, or email us — we respond fast, 24 hours a day, 7 days a week.</p>
+            <p className="text-muted-foreground text-lg">Call or text us — we're available 24 hours a day, 7 days a week.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
-            <a href="tel:+17867886001" className="group bg-primary hover:bg-primary/90 p-8 rounded flex flex-col items-center text-center gap-4 transition-all hover:-translate-y-2 shadow-[0_0_30px_rgba(238,90,68,0.3)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-16">
+            <a href="tel:+17869298933" className="group bg-primary hover:bg-primary/90 p-8 rounded flex flex-col items-center text-center gap-4 transition-all hover:-translate-y-2 shadow-[0_0_30px_rgba(238,90,68,0.3)]">
               <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
                 <PhoneCall className="w-8 h-8 text-white" />
               </div>
               <div className="font-condensed text-sm font-bold uppercase tracking-widest text-white/70">Call Us</div>
-              <div className="font-condensed text-3xl font-black text-white uppercase tracking-wide leading-tight">(786) 788-6001</div>
+              <div className="font-condensed text-3xl font-black text-white uppercase tracking-wide leading-tight">(786) 929-8933</div>
               <div className="text-white/60 text-sm font-medium">Tap to call instantly</div>
             </a>
 
-            <a href="sms:+17867886001" className="group bg-background border border-white/10 hover:border-primary/50 p-8 rounded flex flex-col items-center text-center gap-4 transition-all hover:-translate-y-2">
+            <a href="sms:+17869298933" className="group bg-background border border-white/10 hover:border-primary/50 p-8 rounded flex flex-col items-center text-center gap-4 transition-all hover:-translate-y-2">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-8 h-8 text-primary" />
               </div>
               <div className="font-condensed text-sm font-bold uppercase tracking-widest text-muted-foreground">Text Us</div>
-              <div className="font-condensed text-3xl font-black text-white uppercase tracking-wide leading-tight">(786) 788-6001</div>
+              <div className="font-condensed text-3xl font-black text-white uppercase tracking-wide leading-tight">(786) 929-8933</div>
               <div className="text-muted-foreground text-sm font-medium">Tap to open messages</div>
-            </a>
-
-            <a href="mailto:info@royaltyconcretemiami.com" className="group bg-background border border-white/10 hover:border-primary/50 p-8 rounded flex flex-col items-center text-center gap-4 transition-all hover:-translate-y-2">
-              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
-                <Mail className="w-8 h-8 text-primary" />
-              </div>
-              <div className="font-condensed text-sm font-bold uppercase tracking-widest text-muted-foreground">Email Us</div>
-              <div className="font-condensed text-xl font-black text-white tracking-wide leading-tight break-all">info@royaltyconcretemiami.com</div>
-              <div className="text-muted-foreground text-sm font-medium">We reply within hours</div>
             </a>
           </div>
 
@@ -324,7 +313,7 @@ function LandingPage() {
               </div>
               <div>
                 <div className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Service Area</div>
-                <div className="text-white font-medium">Miami & All of Miami-Dade County, FL</div>
+                <div className="text-white font-medium">Miami & South Florida</div>
               </div>
             </div>
             <div className="hidden md:block w-px h-12 bg-white/10"></div>
@@ -334,7 +323,7 @@ function LandingPage() {
               </div>
               <div>
                 <div className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Hours</div>
-                <div className="text-white font-medium">Sat 8:00 AM – 12:00 AM • Call for Daily Hours</div>
+                <div className="text-white font-medium">Open 24 Hours — 7 Days a Week</div>
               </div>
             </div>
           </div>
@@ -349,10 +338,10 @@ function LandingPage() {
               <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
                 <Hammer className="text-white w-4 h-4" />
               </div>
-              <span className="font-condensed text-2xl font-bold uppercase tracking-wider">Royalty Concrete & Remodeling</span>
+              <span className="font-condensed text-2xl font-bold uppercase tracking-wider">Macias Multy Services LLC</span>
             </div>
             <div className="text-muted-foreground text-sm font-medium">
-              &copy; {new Date().getFullYear()} Royalty Concrete & Remodeling. All rights reserved.
+              &copy; {new Date().getFullYear()} Macias Multy Services LLC. All rights reserved.
             </div>
             <div className="flex gap-6 text-sm font-bold uppercase tracking-wider text-muted-foreground">
               <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
