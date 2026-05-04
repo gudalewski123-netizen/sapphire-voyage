@@ -110,7 +110,7 @@ export const THEME = {
   foreground: "35 30% 96%",
   card: "215 28% 13%",
   cardFg: "35 30% 96%",
-  accent: "175 75% 50%",       // Turquoise teal
+  accent: "142 71% 25%",       // Tier 1 dark green marker
   accentFg: "215 35% 8%",
   mutedFg: "35 15% 70%",
   border: "215 25% 20%",
