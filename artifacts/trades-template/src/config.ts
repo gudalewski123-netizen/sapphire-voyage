@@ -104,7 +104,7 @@ export const REVIEWS = [
 // ============================================================
 
 export const THEME = {
-  primary: "8 88% 58%",        // Miami coral / orange-red
+  primary: "142 71% 30%",      // Tier 1 dark green
   primaryFg: "0 0% 100%",
   background: "215 35% 8%",    // Deep navy
   foreground: "35 30% 96%",
