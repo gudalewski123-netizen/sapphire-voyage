@@ -47,12 +47,12 @@ export default function Login() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
                 className="w-full bg-input border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="you@example.com"
+                placeholder="Email or username"
               />
             </div>
             <div>
