@@ -45,13 +45,23 @@ async function notifyByEmail(request: {
       `Type: ${request.requestType === "structured" ? "Quick Update" : "Custom Request"}\n\n` +
       `---\n\n${message}`;
 
-    await fetch(FORMSUBMIT_URL, {
+    const fsRes = await fetch(FORMSUBMIT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Referer: "https://waterstonedigital.replit.app/",
+        Origin: "https://waterstonedigital.replit.app",
+      },
       body: JSON.stringify({ subject, message: body }),
     });
+    const fsData = await fsRes.json().catch(() => ({}));
+    if (fsData.success !== "true") {
+      throw new Error(`FormSubmit rejected: ${JSON.stringify(fsData)}`);
+    }
   } catch (err) {
-    // Non-fatal — request is already saved in DB
+    // Log but don't fail — request is already saved in DB
+    console.error("[email] FormSubmit notification failed:", err);
   }
 }
 
