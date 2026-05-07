@@ -10,28 +10,26 @@ import SiteSettings from "@/pages/SiteSettings";
 
 const queryClient = new QueryClient();
 
+const Spinner = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  let auth;
+  try { auth = useAuth(); } catch { return <Spinner />; }
+  const { user, loading } = auth;
+  if (loading) return <Spinner />;
   if (!user) return <Redirect to="/login" />;
   return <Component />;
 }
 
 function PublicRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  let auth;
+  try { auth = useAuth(); } catch { return <Spinner />; }
+  const { user, loading } = auth;
+  if (loading) return <Spinner />;
   if (user) return <Redirect to="/" />;
   return <Component />;
 }

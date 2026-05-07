@@ -1,6 +1,4 @@
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-async function req(method: string, path: string, body?: unknown) {
+async function req(method: string, path: string, body?: unknown, redirectOn401 = false) {
   const res = await fetch(`/api${path}`, {
     method,
     credentials: "include",
@@ -8,6 +6,10 @@ async function req(method: string, path: string, body?: unknown) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && redirectOn401) {
+    window.location.href = import.meta.env.BASE_URL + "login";
+    throw new Error("Session expired");
+  }
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
 }
@@ -18,8 +20,8 @@ export const api = {
   login: (body: { email: string; password: string }) =>
     req("POST", "/auth/login", body),
   logout: () => req("POST", "/auth/logout"),
-  me: () => req("GET", "/auth/me"),
-  getRequests: () => req("GET", "/portal/requests"),
+  me: () => req("GET", "/auth/me"),                              // no redirect — used for session check
+  getRequests: () => req("GET", "/portal/requests", undefined, true),   // redirect on 401
   createRequest: (body: Record<string, unknown>) =>
-    req("POST", "/portal/requests", body),
+    req("POST", "/portal/requests", body, true),                // redirect on 401
 };

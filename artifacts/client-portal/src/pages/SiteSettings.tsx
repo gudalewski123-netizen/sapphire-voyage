@@ -76,6 +76,11 @@ export default function SiteSettings() {
   const handleQuickSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const hasContent = [businessName, phone, aboutText, servicesText, pricingNotes, photoNotes].some(v => v.trim());
+    if (!hasContent) {
+      setError("Please fill in at least one field before submitting.");
+      return;
+    }
     setSubmitting(true);
     try {
       await api.createRequest({
