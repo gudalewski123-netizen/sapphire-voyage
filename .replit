@@ -28,6 +28,10 @@ localPort = 8081
 externalPort = 80
 
 [[ports]]
+localPort = 8082
+externalPort = 3003
+
+[[ports]]
 localPort = 20624
 externalPort = 3000
 
@@ -40,3 +44,6 @@ externalPort = 3001
 [userenv.shared]
 JWT_SECRET = "b94457eea49aa11a1b6174b920a493affed2bd3cfb79d606446847051262304c34d04776fa441a20d0ecfe807b323f94"
 ADMIN_API_KEY = "79c830f059ac35680ad90acffd63f9dce67775100bbc351a"
+
+[nix]
+channel = "stable-25_05"
