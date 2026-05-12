@@ -4,6 +4,9 @@
 # Usage:  ./scripts/provision/vercel.sh <project-name> [production-domain]
 # Example: ./scripts/provision/vercel.sh acme-roofing acmeroofing.com
 #
+# Requires the current directory to be a git repo with origin set to a teddyk28/* repo
+# (Vercel's GitHub App is installed on teddyk28 only).
+#
 # On success: prints the production URL (custom domain if provided, else *.vercel.app) to stdout.
 
 set -euo pipefail
@@ -18,6 +21,10 @@ PRODUCTION_DOMAIN="${2:-}"
 ORIGIN=$(git config --get remote.origin.url 2>/dev/null || true)
 [[ -n "${ORIGIN}" ]] || die "no git remote 'origin' — run this from inside the client's repo"
 GITHUB_REPO=$(echo "${ORIGIN}" | sed -E 's|.*github.com[:/]([^/]+/[^/.]+)(\.git)?$|\1|')
+
+if [[ "${GITHUB_REPO}" != teddyk28/* ]]; then
+  die "repo '${GITHUB_REPO}' is not under teddyk28 — Vercel's GitHub App can only see teddyk28/* repos. See CLAUDE.md section 1 and TEDDY-SETUP.md."
+fi
 
 require_env_file
 require_var VERCEL_TOKEN
@@ -36,10 +43,10 @@ CREATE_PAYLOAD=$(jq -n \
     }
   }')
 
-RESPONSE=$(curl -fsS -X POST "https://api.vercel.com/v11/projects?teamId=${VERCEL_TEAM_ID}" \
+RESPONSE=$(api_call -X POST "https://api.vercel.com/v11/projects?teamId=${VERCEL_TEAM_ID}" \
   -H "Authorization: Bearer ${VERCEL_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d "${CREATE_PAYLOAD}") || die "Vercel project creation failed"
+  -d "${CREATE_PAYLOAD}")
 
 PROJECT_ID=$(echo "${RESPONSE}" | jq -r '.id // empty')
 [[ -n "${PROJECT_ID}" ]] || die "Vercel response missing project id: ${RESPONSE}"
@@ -59,7 +66,7 @@ DEPLOY_PAYLOAD=$(jq -n \
     }
   }')
 
-curl -fsS -X POST "https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}" \
+api_call -X POST "https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}" \
   -H "Authorization: Bearer ${VERCEL_TOKEN}" \
   -H "Content-Type: application/json" \
   -d "${DEPLOY_PAYLOAD}" > /dev/null || \
@@ -71,7 +78,7 @@ if [[ -n "${PRODUCTION_DOMAIN}" ]]; then
   for d in "${PRODUCTION_DOMAIN}" "www.${PRODUCTION_DOMAIN}"; do
     info "Attaching domain '${d}'..."
     DOMAIN_PAYLOAD=$(jq -n --arg name "${d}" '{name: $name}')
-    curl -fsS -X POST "https://api.vercel.com/v10/projects/${PROJECT_ID}/domains?teamId=${VERCEL_TEAM_ID}" \
+    api_call -X POST "https://api.vercel.com/v10/projects/${PROJECT_ID}/domains?teamId=${VERCEL_TEAM_ID}" \
       -H "Authorization: Bearer ${VERCEL_TOKEN}" \
       -H "Content-Type: application/json" \
       -d "${DOMAIN_PAYLOAD}" > /dev/null || \

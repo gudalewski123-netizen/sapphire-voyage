@@ -4,8 +4,9 @@
 # Usage:  ./scripts/provision/render.sh <service-name> <database-url> <allowed-origins> [github-repo]
 # Example: ./scripts/provision/render.sh acme-roofing-api "postgresql://..." "https://acme.com,https://www.acme.com"
 #
-# Requires the current directory to be a git repo with origin set to the GitHub repo
-# UNLESS the optional 4th arg <github-repo> is provided (e.g. "teddyk28/acme-roofing").
+# Requires the current directory to be a git repo with origin set to a GitHub repo
+# that Render's GitHub App can access (i.e. under teddyk28), UNLESS the optional
+# 4th arg <github-repo> is provided (e.g. "teddyk28/acme-roofing").
 #
 # On success: prints the https://<service>.onrender.com URL to stdout.
 
@@ -27,6 +28,11 @@ if [[ -z "${GITHUB_REPO}" ]]; then
   GITHUB_REPO=$(echo "${ORIGIN}" | sed -E 's|.*github.com[:/]([^/]+/[^/.]+)(\.git)?$|\1|')
 fi
 
+# Sanity check: Render's GitHub App is on teddyk28. Repos elsewhere will be rejected.
+if [[ "${GITHUB_REPO}" != teddyk28/* ]]; then
+  die "repo '${GITHUB_REPO}' is not under teddyk28 — Render's GitHub App can only see teddyk28/* repos. See CLAUDE.md section 1 and TEDDY-SETUP.md."
+fi
+
 require_env_file
 require_var RENDER_API_KEY
 require_var RENDER_OWNER_ID
@@ -40,7 +46,6 @@ START_CMD='pnpm --filter @workspace/api-server run start'
 JWT_SECRET=$(openssl rand -base64 32 | tr -d '=+/')
 ADMIN_API_KEY=$(openssl rand -base64 32 | tr -d '=+/')
 
-# Build JSON safely with jq (avoids quoting bugs from special chars in DATABASE_URL etc.)
 PAYLOAD=$(jq -n \
   --arg name "${SERVICE_NAME}" \
   --arg ownerId "${RENDER_OWNER_ID}" \
@@ -76,11 +81,11 @@ PAYLOAD=$(jq -n \
     ]
   }')
 
-RESPONSE=$(curl -fsS -X POST "https://api.render.com/v1/services" \
+RESPONSE=$(api_call -X POST "https://api.render.com/v1/services" \
   -H "Authorization: Bearer ${RENDER_API_KEY}" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -d "${PAYLOAD}") || die "Render API call failed"
+  -d "${PAYLOAD}")
 
 SERVICE_ID=$(echo "${RESPONSE}" | jq -r '.service.id // .id // empty')
 SERVICE_URL=$(echo "${RESPONSE}" | jq -r '.service.serviceDetails.url // .serviceDetails.url // empty')

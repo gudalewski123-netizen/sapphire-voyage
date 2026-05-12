@@ -21,10 +21,10 @@ require_var CLOUDFLARE_API_TOKEN
 VERCEL_CNAME_TARGET="vercel-dns-017.com"
 
 info "Looking up Cloudflare zone for ${DOMAIN}..."
-ZONE_ID=$(curl -fsS \
+ZONE_LOOKUP=$(api_call \
   -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-  "https://api.cloudflare.com/client/v4/zones?name=${DOMAIN}" | \
-  jq -r '.result[0].id // empty')
+  "https://api.cloudflare.com/client/v4/zones?name=${DOMAIN}")
+ZONE_ID=$(echo "${ZONE_LOOKUP}" | jq -r '.result[0].id // empty')
 
 [[ -n "${ZONE_ID}" ]] || die "no Cloudflare zone found for ${DOMAIN} (is the domain added to Cloudflare?)"
 info "Found zone: ${ZONE_ID}"
@@ -34,9 +34,8 @@ upsert_cname() {
   local target="$2"
   info "Upserting CNAME ${record_name} -> ${target} (proxied=false)..."
 
-  # Find existing record with this name
   local existing_id
-  existing_id=$(curl -fsS \
+  existing_id=$(api_call \
     -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
     "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?name=${record_name}&type=CNAME" | \
     jq -r '.result[0].id // empty')
@@ -48,14 +47,14 @@ upsert_cname() {
     '{type: "CNAME", name: $name, content: $target, proxied: false, ttl: 1}')
 
   if [[ -n "${existing_id}" ]]; then
-    curl -fsS -X PUT \
+    api_call -X PUT \
       -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
       -H "Content-Type: application/json" \
       -d "${body}" \
       "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${existing_id}" > /dev/null
     info "  Updated existing record (${existing_id})"
   else
-    curl -fsS -X POST \
+    api_call -X POST \
       -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
       -H "Content-Type: application/json" \
       -d "${body}" \

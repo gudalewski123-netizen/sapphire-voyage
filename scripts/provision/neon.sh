@@ -32,10 +32,10 @@ PAYLOAD=$(jq -n \
     }
   }')
 
-RESPONSE=$(curl -fsS -X POST "https://console.neon.tech/api/v2/projects" \
+RESPONSE=$(api_call -X POST "https://console.neon.tech/api/v2/projects" \
   -H "Authorization: Bearer ${NEON_API_KEY}" \
   -H "Content-Type: application/json" \
-  -d "${PAYLOAD}") || die "Neon API call failed"
+  -d "${PAYLOAD}")
 
 PROJECT_ID=$(echo "${RESPONSE}" | jq -r '.project.id')
 CONN_URI=$(echo "${RESPONSE}" | jq -r '.connection_uris[0].connection_uri // empty')
@@ -43,13 +43,19 @@ CONN_URI=$(echo "${RESPONSE}" | jq -r '.connection_uris[0].connection_uri // emp
 [[ -n "${PROJECT_ID}" ]] || die "Neon response missing project id: ${RESPONSE}"
 [[ -n "${CONN_URI}" ]] || die "Neon response missing connection_uri (check console.neon.tech)"
 
-if [[ "${CONN_URI}" != *"sslmode="* ]]; then
-  if [[ "${CONN_URI}" == *"?"* ]]; then
-    CONN_URI="${CONN_URI}&sslmode=require&channel_binding=require"
-  else
-    CONN_URI="${CONN_URI}?sslmode=require&channel_binding=require"
+# Ensure both sslmode=require and channel_binding=require are in the URL.
+add_param_if_missing() {
+  local param="$1"
+  if [[ "${CONN_URI}" != *"${param}="* ]]; then
+    if [[ "${CONN_URI}" == *"?"* ]]; then
+      CONN_URI="${CONN_URI}&${param}=require"
+    else
+      CONN_URI="${CONN_URI}?${param}=require"
+    fi
   fi
-fi
+}
+add_param_if_missing "sslmode"
+add_param_if_missing "channel_binding"
 
 mkdir -p "${TIER1_CONFIG_DIR}/databases"
 echo "${CONN_URI}" > "${TIER1_CONFIG_DIR}/databases/${PROJECT_NAME}.txt"

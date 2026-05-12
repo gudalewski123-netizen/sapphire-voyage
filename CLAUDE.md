@@ -6,6 +6,12 @@ It tells you what this project is, how to customize it for a new client, and how
 
 ---
 
+## 0. Hard constraint: new repos must be under `teddyk28`
+
+When using this template to spin up a new client site, the new repo **must** be created under the GitHub user `teddyk28`. Render and Vercel both have their GitHub Apps installed only on `teddyk28` — they will reject `POST` requests to create services/projects from repos under any other account. The provision scripts in `scripts/provision/` enforce this and exit with a clear error.
+
+If you're the user (`gudalewski123-netizen`) trying to create a new repo and don't have permission, see `TEDDY-SETUP.md` for the one-time GitHub PAT setup that gives you that permission.
+
 ## 1. What this repo is
 
 A pnpm-workspace monorepo with three deployable apps and a shared DB layer:
