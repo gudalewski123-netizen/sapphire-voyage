@@ -1,0 +1,39 @@
+# Render Blueprint — auto-creates the backend web service when imported.
+#
+# How to use this when forking the template for a real client:
+#   1. Fork this repo on GitHub (rename to <client>).
+#   2. Go to https://dashboard.render.com/blueprints → "New Blueprint Instance"
+#   3. Connect your GitHub account → pick the forked repo.
+#   4. Render reads this file and creates the web service automatically.
+#   5. You'll be prompted to fill in the secrets marked `sync: false` below
+#      (DATABASE_URL = your client's new Neon connection string, ALLOWED_ORIGINS
+#      = the live domain). ADMIN_PASSWORD + SESSION_SECRET are auto-generated.
+#   6. Save → Render builds + deploys in ~3 min.
+#
+# Rename `services[0].name` after forking — must be globally unique on Render.
+
+services:
+  - type: web
+    name: tier1-template-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: .
+    buildCommand: corepack enable && NODE_ENV=development pnpm install --no-frozen-lockfile && pnpm --filter @workspace/db run push && pnpm --filter @workspace/api-server run build
+    startCommand: pnpm --filter @workspace/api-server run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: LEAD_NOTIFY_TO
+        value: teddy.nk28@gmail.com
