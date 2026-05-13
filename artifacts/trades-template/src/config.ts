@@ -18,6 +18,13 @@ export const BUSINESS = {
   hours: "Open 24 Hours — 7 Days a Week",
 
   yearsInBusiness: "",
+
+  // Trade type — must match a key in placeholders.ts (or "default").
+  // Lowercase, hyphen-separated. Examples: "softwash", "roofing", "lawn-care",
+  // "fencing", "auto-detailing", "junk-removal", "hvac", "plumbing",
+  // "electrical", "painting", "tree-services", "cleaning".
+  // Used to pick trade-appropriate placeholder photos until the client sends real ones.
+  tradeType: "default",
 };
 
 export const HERO = {

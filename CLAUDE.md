@@ -85,3 +85,21 @@ If you (the agent) read this and you're spinning up a new client:
 4. **`CHECKLIST.md`** at repo root is the per-fork launch checklist. Tick boxes; don't ship with anything unchecked.
 5. **Photos in `public/`** use generic names (`hero-bg.png`, `team-photo.jpg`). Drop the client's photos with the same names — don't introduce `IMG_xxxx.jpg`-style filenames.
 6. **Phone numbers from Google Business Profile screenshots can be call-tracking lines** (e.g., Google Local Services Ads). Always verify against the client's actual website or Yelp.
+
+---
+
+## Placeholder photos (trade-specific stock images)
+
+Every new client starts with **trade-themed Unsplash photos** as placeholders — the design pitch looks polished even before the client sends real photos.
+
+**How it works:**
+1. Set `BUSINESS.tradeType` in `config.ts` (e.g. `"roofing"`, `"softwash"`, `"lawn-care"`).
+2. The template auto-pulls relevant Unsplash photos via `getPlaceholders(BUSINESS.tradeType)` in `placeholders.ts`.
+3. When the client provides real photos, drop them in `public/` (e.g. `hero.jpg`, `about.jpg`, `gallery-1.jpg`) and update the imports in `App.tsx` to use local paths instead of the placeholder URLs.
+
+**Supported trade keys** (12 total):
+`softwash`, `roofing`, `lawn-care`, `fencing`, `auto-detailing`, `junk-removal`, `hvac`, `plumbing`, `electrical`, `painting`, `tree-services`, `cleaning`. Anything else → generic Picsum fallback.
+
+**Adding a new trade:** edit `placeholders.ts` — add a new entry with 1 hero + 1 about + 4 gallery URLs from Unsplash.
+
+**Broken URL?** Any specific Unsplash photo ID may go stale. Swap it: go to unsplash.com, search the keyword, click a photo, copy its URL (`https://images.unsplash.com/photo-<id>?...`), paste into placeholders.ts.

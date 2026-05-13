@@ -102,6 +102,12 @@ Update the new repo's `CLAUDE.md` with the live URLs + admin credentials. Send t
 
 ---
 
+## Placeholder photos
+
+The template ships with trade-themed Unsplash photos as placeholders. They display until you drop real client photos in `public/` and update App.tsx imports. Set `BUSINESS.tradeType` in `config.ts` to pick the right trade (e.g., `"roofing"`, `"softwash"`).
+
+See placeholders.ts for the 12 supported trades and how to add more.
+
 ## What if something fails?
 
 - Render build fails → check the build log; the most common cause is a missing baseline patch (already applied here, shouldn't happen)
