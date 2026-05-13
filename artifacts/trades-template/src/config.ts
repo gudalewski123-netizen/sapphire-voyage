@@ -18,6 +18,13 @@ export const BUSINESS = {
   hours: "Open 24 Hours — 7 Days a Week",
 
   yearsInBusiness: "",
+
+  // Trade type — must match a key in placeholders.ts (or "default").
+  // Lowercase, hyphen-separated. Examples: "softwash", "roofing", "lawn-care",
+  // "fencing", "auto-detailing", "junk-removal", "hvac", "plumbing",
+  // "electrical", "painting", "tree-services", "cleaning".
+  // Used to pick trade-appropriate placeholder photos until the client sends real ones.
+  tradeType: "default",
 };
 
 export const HERO = {
@@ -115,3 +122,13 @@ export const THEME = {
   mutedFg: "35 15% 70%",
   border: "215 25% 20%",
 };
+
+// ============================================================
+//  PITCH_MODE — Set to `true` when you're shipping a design pitch
+//  without a backend deployed yet. The quote form will hide its
+//  submit button and show a "We'll call you back at <phone>"
+//  message instead of trying to POST to /api/quote.
+//  Flip to `false` when the backend is live.
+// ============================================================
+
+export const PITCH_MODE = false;
