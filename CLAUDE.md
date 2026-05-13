@@ -157,3 +157,23 @@ Returns `{"success":"true"}` → activated. Returns `{"success":"false","message
 ### Spam-folder reality check
 
 FormSubmit emails frequently land in **Spam** or **Promotions**, especially the first activation email. Tell every new client to check those folders explicitly. They almost always have to fish the email out.
+
+---
+
+## Build-time safety nets (added priorities 4 + 5)
+
+### `scripts/check-config.sh` — pre-build config validator
+Wired into `artifacts/trades-template/package.json`'s `prebuild` hook. Fails the Vercel/local build if:
+
+- `BUSINESS.email` is empty AND `PITCH_MODE` is false → would silently route leads to `teddy.nk28@gmail.com`
+- `BUSINESS.name` is still `[Client Business Name]` placeholder AND `PITCH_MODE` is false → forgot to customize
+
+Bypass for genuine edge cases: `SKIP_CONFIG_CHECK=1 pnpm build`.
+
+### `scripts/smoke-test.sh` — post-deploy verification
+Run after every `pnpm push` / Render rebuild:
+```bash
+./scripts/smoke-test.sh https://<render-url> https://<vercel-url>
+```
+
+Checks Render health, Vercel root, Vercel→Render API proxy, admin route mounted. ~10 seconds, catches the 4 most common breakages. Step is also baked into `CHECKLIST.md` so it's hard to forget.

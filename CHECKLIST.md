@@ -57,6 +57,10 @@ Tick boxes as you go. Don't ship to production with any unchecked.
 - [ ] `STRIPE_WEBHOOK_SECRET` set on Render
 - [ ] Test checkout → row appears in `orders` table
 
+## Smoke test (after every deploy)
+- [ ] `./scripts/smoke-test.sh https://<render-url> https://<vercel-url>` returns all ✓
+- [ ] If any check fails, see error explanations at the bottom of smoke-test.sh
+
 ## Final hand-off
 - [ ] Admin password handed to client
 - [ ] Client tested their own admin login successfully
