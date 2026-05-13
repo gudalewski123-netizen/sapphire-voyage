@@ -19,7 +19,13 @@ services:
         value: teddy.nk28@gmail.com
       - key: JWT_SECRET
         generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
       - key: ADMIN_API_KEY
+        generateValue: true
+      # Emergency-only break-glass admin login. Any username + this password is accepted.
+      # Leave set so you can recover access if you forget the in-app credentials.
+      - key: ADMIN_PASSWORD
         generateValue: true
       # Stripe (uncomment if site sells)
       # - key: STRIPE_SECRET_KEY
