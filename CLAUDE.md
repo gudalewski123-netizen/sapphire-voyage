@@ -72,3 +72,16 @@ If you're running this through Cowork (Claude desktop), the sandbox is isolated:
    chmod +x scripts/*.sh
    ```
    Without this, `./scripts/bootstrap-client.sh` will fail with "permission denied".
+
+---
+
+## Sanity checks for any agent working on this template
+
+If you (the agent) read this and you're spinning up a new client:
+
+1. **You are working on the TEMPLATE**, not a previous client. Don't mirror cleanslate-softwash or any other live site — its assets and admin styling are client-specific. Always copy from THIS repo's files.
+2. **`config.ts` is the single source of truth for branding.** All copy, phone, services, reviews, colors live there. Frontend reads from it; backend admin.ts uses generic CSS vars.
+3. **`PITCH_MODE` in config.ts** lets you ship a design preview without provisioning the backend. Set to `true` while pitching, flip to `false` after Render service is live.
+4. **`CHECKLIST.md`** at repo root is the per-fork launch checklist. Tick boxes; don't ship with anything unchecked.
+5. **Photos in `public/`** use generic names (`hero-bg.png`, `team-photo.jpg`). Drop the client's photos with the same names — don't introduce `IMG_xxxx.jpg`-style filenames.
+6. **Phone numbers from Google Business Profile screenshots can be call-tracking lines** (e.g., Google Local Services Ads). Always verify against the client's actual website or Yelp.

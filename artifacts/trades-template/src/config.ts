@@ -115,3 +115,13 @@ export const THEME = {
   mutedFg: "35 15% 70%",
   border: "215 25% 20%",
 };
+
+// ============================================================
+//  PITCH_MODE — Set to `true` when you're shipping a design pitch
+//  without a backend deployed yet. The quote form will hide its
+//  submit button and show a "We'll call you back at <phone>"
+//  message instead of trying to POST to /api/quote.
+//  Flip to `false` when the backend is live.
+// ============================================================
+
+export const PITCH_MODE = false;
