@@ -4,7 +4,7 @@ import { Switch, Route, Router as WouterRouter, Link } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BUSINESS, HERO, ABOUT, CTA_BANNER, BADGES, SERVICES, REVIEWS, THEME } from "./config";
+import { BUSINESS, HERO, ABOUT, CTA_BANNER, BADGES, SERVICES, REVIEWS, THEME, PITCH_MODE } from "./config";
 import AdminPage from "./pages/AdminPage";
 
 const queryClient = new QueryClient();
@@ -26,6 +26,156 @@ function useApplyTheme() {
     root.style.setProperty("--ring", THEME.primary);
     root.style.setProperty("--muted", THEME.card);
   }, []);
+}
+
+
+// ============================================================
+//  QuoteForm — FormSubmit-integrated contact form.
+//
+//  How it works:
+//    1. Customer fills out the form (name, phone, email, service, message).
+//    2. On submit, POSTs DIRECTLY to formsubmit.co — bypasses our backend
+//       entirely. (Render free tier blocks SMTP; FormSubmit is HTTP-based.)
+//    3. FormSubmit emails the address in BUSINESS.email.
+//    4. FIRST submission to a new email triggers an "Activate Form" email
+//       to that address — recipient clicks once → permanent.
+//
+//  PITCH_MODE: when true (no backend yet), the form shows a "Call us"
+//  CTA instead of submitting. Set to false in config.ts once everything's
+//  live and tested.
+//
+//  Default recipient: BUSINESS.email from config.ts. Falls back to
+//  teddy.nk28@gmail.com (already activated) for pitch builds.
+// ============================================================
+function QuoteForm() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string>("");
+
+  // FormSubmit recipient — pull from BUSINESS.email, fall back to teddy.nk28@gmail.com
+  // (already FormSubmit-activated, so pitch builds work even before client confirms).
+  const recipient = BUSINESS.email && BUSINESS.email.trim().length > 0
+    ? BUSINESS.email.trim()
+    : "teddy.nk28@gmail.com";
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (PITCH_MODE) return; // pitch mode shouldn't reach here; defensive
+    setStatus("submitting");
+    setErrorMsg("");
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    // FormSubmit special fields
+    fd.append("_subject", `New ${BUSINESS.trade} quote from ${fd.get("name") || "site visitor"}`);
+    fd.append("_template", "table");
+    fd.append("_captcha", "false"); // optional; FormSubmit serves a CAPTCHA page by default
+    fd.append("Source", BUSINESS.name);
+
+    try {
+      const res = await fetch(`https://formsubmit.co/${encodeURIComponent(recipient)}`, {
+        method: "POST",
+        body: fd,
+      });
+      // FormSubmit's regular endpoint returns HTML; we don't need to parse it,
+      // just verify HTTP 200. The activation flow (if needed) happens server-side.
+      if (!res.ok) throw new Error(`FormSubmit returned ${res.status}`);
+      setStatus("success");
+      form.reset();
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please call us.");
+    }
+  }
+
+  // PITCH_MODE: show "call us" card instead of the form
+  if (PITCH_MODE) {
+    return (
+      <section id="quote" className="py-20 bg-card border-y border-white/10">
+        <div className="container mx-auto px-6 max-w-2xl text-center">
+          <h2 className="text-4xl md:text-5xl font-condensed font-black uppercase tracking-wide text-white mb-4">
+            Get a Free Quote
+          </h2>
+          <p className="text-muted-foreground mb-8">
+            We're finalizing our online quote form. In the meantime, give us a call — we answer fast.
+          </p>
+          <a
+            href={`tel:${BUSINESS.phoneRaw}`}
+            className="inline-flex items-center gap-3 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded font-condensed text-2xl uppercase tracking-wider font-bold transition-all hover:-translate-y-1 shadow-[0_0_30px_rgba(0,0,0,0.4)]"
+          >
+            <PhoneCall className="w-6 h-6" />
+            {BUSINESS.phone}
+          </a>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section id="quote" className="py-20 bg-card border-y border-white/10">
+      <div className="container mx-auto px-6 max-w-2xl">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl md:text-5xl font-condensed font-black uppercase tracking-wide text-white mb-3">
+            Get a Free Quote
+          </h2>
+          <p className="text-muted-foreground">
+            Tell us about your project — we'll get back to you fast.
+          </p>
+        </div>
+
+        {status === "success" ? (
+          <div className="text-center bg-background border border-primary/40 rounded p-10">
+            <ShieldCheck className="w-12 h-12 text-primary mx-auto mb-4" />
+            <h3 className="text-2xl font-condensed font-bold uppercase text-white mb-2">Got it.</h3>
+            <p className="text-muted-foreground">
+              We received your request. Expect a call from {BUSINESS.phone} within 1 business day.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid md:grid-cols-2 gap-5">
+              <input
+                name="name" required placeholder="Your name *"
+                className="bg-background border border-white/10 rounded px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+              />
+              <input
+                name="phone" required type="tel" placeholder="Phone *"
+                className="bg-background border border-white/10 rounded px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+            <input
+              name="email" required type="email" placeholder="Email *"
+              className="w-full bg-background border border-white/10 rounded px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+            />
+            <select
+              name="service" required defaultValue=""
+              className="w-full bg-background border border-white/10 rounded px-4 py-3 text-white focus:outline-none focus:border-primary"
+            >
+              <option value="" disabled>Which service do you need? *</option>
+              {SERVICES.map((s) => (
+                <option key={s.name} value={s.name}>{s.name}</option>
+              ))}
+              <option value="Other">Other / Not sure</option>
+            </select>
+            <textarea
+              name="message" rows={4} placeholder="Tell us about your project (optional)"
+              className="w-full bg-background border border-white/10 rounded px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none"
+            />
+            <button
+              type="submit" disabled={status === "submitting"}
+              className="w-full bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-4 rounded font-condensed text-xl uppercase tracking-wider font-bold transition-all"
+            >
+              {status === "submitting" ? "Sending..." : "Request a Free Quote"}
+            </button>
+            {status === "error" && (
+              <p className="text-red-400 text-sm text-center">
+                {errorMsg} — please call <a href={`tel:${BUSINESS.phoneRaw}`} className="underline">{BUSINESS.phone}</a>.
+              </p>
+            )}
+          </form>
+        )}
+      </div>
+    </section>
+  );
 }
 
 function LandingPage() {
@@ -298,6 +448,8 @@ function LandingPage() {
           </div>
         </div>
       </section>
+
+      <QuoteForm />
 
       {/* Footer */}
       <footer className="bg-background border-t border-white/10 py-12">

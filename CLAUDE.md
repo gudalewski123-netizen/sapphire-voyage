@@ -103,3 +103,57 @@ Every new client starts with **trade-themed Unsplash photos** as placeholders �
 **Adding a new trade:** edit `placeholders.ts` — add a new entry with 1 hero + 1 about + 4 gallery URLs from Unsplash.
 
 **Broken URL?** Any specific Unsplash photo ID may go stale. Swap it: go to unsplash.com, search the keyword, click a photo, copy its URL (`https://images.unsplash.com/photo-<id>?...`), paste into placeholders.ts.
+
+---
+
+## Quote form / FormSubmit integration
+
+The landing page now ships with a **FormSubmit-integrated quote form** above the footer. Workflow:
+
+### Where the recipient email comes from
+
+`BUSINESS.email` in `config.ts`. If empty, the form falls back to `teddy.nk28@gmail.com` (already FormSubmit-activated for many origins).
+
+```ts
+// config.ts
+export const BUSINESS = {
+  // ...
+  email: "client@example.com",   // ← FormSubmit sends quotes here
+};
+```
+
+### How submission works
+
+1. Customer fills out the form (name, phone, email, service, optional message)
+2. Form POSTs **directly from the browser** to `https://formsubmit.co/<BUSINESS.email>` (multipart/form-data, supports attachments later if needed)
+3. **First submission to a new email triggers an "Activate Form" email** to that address. Recipient clicks the activation link inside (one time, takes 5 seconds, permanent thereafter).
+4. All subsequent submissions deliver normally to inbox.
+
+### Why not use the backend?
+
+Render's free tier blocks all outbound SMTP. We tried nodemailer/Gmail — silent 10-second timeout. FormSubmit's HTTPS endpoint doesn't have that problem. The frontend POSTs directly so we never need server-side email.
+
+### PITCH_MODE behavior
+
+When `PITCH_MODE = true` in `config.ts`, the form section is replaced by a "Call us at <phone>" card. Lets you ship a design preview without provisioning a backend OR triggering FormSubmit activation. Flip to `false` once the backend is live and the client has confirmed they want submissions emailed.
+
+### When switching `BUSINESS.email` to the client's address
+
+1. Update `email:` in `config.ts`
+2. Commit + push (Vercel auto-deploys)
+3. Submit a test form
+4. Tell the client: "Check your inbox (and spam folder) for an email from FormSubmit titled 'Confirm your email' — click the activation link, then it's permanent"
+5. After they click, all submissions go to their inbox
+
+### Probing whether an email is activated
+
+```bash
+curl -X POST https://formsubmit.co/ajax/<their-email> \
+  -H "Content-Type: application/json" \
+  -d '{"_subject":"activation check","Test":"probe"}'
+```
+Returns `{"success":"true"}` → activated. Returns `{"success":"false","message":"...needs Activation..."}` → activation email pending.
+
+### Spam-folder reality check
+
+FormSubmit emails frequently land in **Spam** or **Promotions**, especially the first activation email. Tell every new client to check those folders explicitly. They almost always have to fish the email out.
