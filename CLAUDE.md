@@ -218,3 +218,9 @@ Endpoints:
 ### When this might 503
 - `ADMIN_PASSWORD` env var not set on Render → `/api/admin/login` returns 503. Set it and redeploy.
 - Database not reachable → `/api/admin/leads` returns 500. Check Neon project status.
+
+## Design Workflow
+Before writing any frontend code, read `FRONTEND.md` — it has the anti-generic guardrails, screenshot workflow, and business-info propagation rules.
+
+## Business Info Propagation
+Source of truth: `business.config.json` (root). Run `node scripts/sync-business-info.mjs` to push it into `src/config.ts` and print the env vars for Render.
