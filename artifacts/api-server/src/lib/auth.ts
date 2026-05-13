@@ -1,8 +1,15 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) throw new Error("JWT_SECRET env var is required");
+// Renamed for consistency with render.yaml's auto-generated env vars:
+// SESSION_SECRET (was JWT_SECRET) and ADMIN_PASSWORD (was ADMIN_API_KEY).
+const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET;
+if (!SESSION_SECRET) throw new Error("SESSION_SECRET env var is required");
+
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.ADMIN_API_KEY;
+if (!ADMIN_PASSWORD) {
+  console.warn("⚠ ADMIN_PASSWORD env var is not set — admin routes will be unreachable until you set it.");
+}
 
 export interface JwtPayload {
   userId: number;
@@ -11,13 +18,14 @@ export interface JwtPayload {
 }
 
 export function signToken(payload: JwtPayload): string {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: "7d" });
+  return jwt.sign(payload, SESSION_SECRET!, { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_SECRET!) as JwtPayload;
+  return jwt.verify(token, SESSION_SECRET!) as JwtPayload;
 }
 
+// User auth (client portal) — JWT in httpOnly cookie
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const token = req.cookies?.auth_token;
   if (!token) {
@@ -33,9 +41,18 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   }
 }
 
+// Admin auth — single password sent as Bearer token (or X-Admin-Key for legacy).
+// The admin dashboard prompts for ADMIN_PASSWORD on first visit, stores it in
+// localStorage, then sends it on every protected request.
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  const key = req.headers["x-admin-api-key"];
-  if (!key || key !== process.env.ADMIN_API_KEY) {
+  if (!ADMIN_PASSWORD) {
+    res.status(503).json({ error: "Admin auth not configured" });
+    return;
+  }
+  const bearer = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+  const legacy = req.headers["x-admin-api-key"] as string | undefined;
+  const key = bearer || legacy;
+  if (!key || key !== ADMIN_PASSWORD) {
     res.status(403).json({ error: "Forbidden" });
     return;
   }
