@@ -10,7 +10,7 @@
   "private": true,
   "devDependencies": {
     "prettier": "^3.8.1",
-    "puppeteer": "^23.0.0",
+    "puppeteer": "^24.15.0",
     "typescript": "~5.9.2"
   }
 }
