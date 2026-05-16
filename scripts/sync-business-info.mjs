@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs';
 
 const CONFIG_JSON = 'business.config.json';
 const CONFIG_TS = 'artifacts/trades-template/src/config.ts';
+const ROBOTS_TXT = 'artifacts/trades-template/public/robots.txt';
 
 if (!existsSync(CONFIG_JSON)) {
   console.error(`✗ Missing ${CONFIG_JSON}`);
@@ -55,6 +56,18 @@ if (biz.primaryColor && biz.primaryColor.trim() && biz.primaryColor.trim().toLow
 
 await writeFile(CONFIG_TS, src);
 console.log(`✓ Updated ${updated} field(s) in ${CONFIG_TS}`);
+
+// Sync robots.txt sitemap URL from biz.domain
+if (existsSync(ROBOTS_TXT)) {
+  const robots = await readFile(ROBOTS_TXT, 'utf8');
+  if (biz.domain && biz.domain.trim()) {
+    const next = robots.replace(/\{\{DOMAIN\}\}/g, biz.domain.trim());
+    await writeFile(ROBOTS_TXT, next);
+    console.log(`✓ robots.txt updated with ${biz.domain.trim()}`);
+  } else if (robots.includes('{{DOMAIN}}')) {
+    console.warn(`⚠ biz.domain is empty — leaving {{DOMAIN}} placeholder in ${ROBOTS_TXT}. Set "domain" in ${CONFIG_JSON} and re-run.`);
+  }
+}
 
 // Print env vars for Render
 console.log('');

@@ -250,3 +250,6 @@ Before writing any frontend code, read `FRONTEND.md` — it has the anti-generic
 
 ## Business Info Propagation
 Source of truth: `business.config.json` (root). Run `node scripts/sync-business-info.mjs` to push it into `src/config.ts` and print the env vars for Render.
+
+## AI crawler discoverability
+Every site ships with a robots.txt at /robots.txt that explicitly allows GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot, Google-Extended, Applebot-Extended, and others. The Sitemap URL is set by sync-business-info.mjs from biz.domain. No action needed per client — but verify on launch (see CHECKLIST.md final step).
