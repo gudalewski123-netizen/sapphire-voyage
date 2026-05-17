@@ -13,12 +13,19 @@
 //       gallery-1.jpg, etc.) and update the imports in App.tsx.
 //
 //  ADDING A NEW TRADE:
-//    Add a new key below with 5 Unsplash photo URLs. Format:
+//    Add a new key below with 5-6 Unsplash photo URLs. Format:
 //    https://images.unsplash.com/photo-<id>?w=1600&q=80&auto=format&fit=crop
 //
 //  SWAPPING A BROKEN URL:
 //    Go to unsplash.com → search keyword → click a photo → copy its URL.
 //    The format `https://images.unsplash.com/photo-<long-id>` is what you want.
+//
+//  UNKNOWN TRADE TYPES:
+//    If BUSINESS.tradeType doesn't match a key below, the site renders
+//    obvious gray "Add Photo" cards (via placehold.co) instead of random
+//    unrelated stock photos. This is intentional — a generic placeholder
+//    is better than a misleading one (e.g. a hair salon site that
+//    accidentally shows a swimming pool).
 // ============================================================
 
 interface TradePhotos {
@@ -31,17 +38,17 @@ interface TradePhotos {
 const u = (id: string, w: number = 1600): string =>
   `https://images.unsplash.com/photo-${id}?w=${w}&q=80&auto=format&fit=crop`;
 
+// Helper to build a placehold.co gray "Add Photo" card at a given size.
+const ph = (w: number, h: number): string =>
+  `https://placehold.co/${w}x${h}/e5e7eb/6b7280?text=Add+Photo`;
+
 // Default fallback — used when tradeType doesn't match any key below.
-// Lorem Picsum returns nice random photos and is guaranteed to load.
+// Obvious gray placeholder cards, NOT random stock photos. This makes
+// it impossible for an unmatched trade to ship with misleading imagery.
 const DEFAULT_PHOTOS: TradePhotos = {
-  hero: "https://picsum.photos/1600/900?random=hero",
-  about: "https://picsum.photos/800/600?random=about",
-  gallery: [
-    "https://picsum.photos/800/600?random=g1",
-    "https://picsum.photos/800/600?random=g2",
-    "https://picsum.photos/800/600?random=g3",
-    "https://picsum.photos/800/600?random=g4",
-  ],
+  hero: ph(1600, 900),
+  about: ph(800, 600),
+  gallery: [ph(800, 600), ph(800, 600), ph(800, 600), ph(800, 600)],
 };
 
 // Curated trade-specific stock photos.
@@ -167,14 +174,143 @@ export const TRADE_PLACEHOLDERS: Record<string, TradePhotos> = {
       u("1584820927498-cfe5211fd8bf", 1000),
     ],
   },
+  // ─── New trade-specific entries (added to stop random/wrong fallback photos) ───
+  salon: {
+    hero: u("1560066984-138dadb4c035"),
+    about: u("1522337360788-8b13dee7a37e", 1000),
+    gallery: [
+      u("1560066984-138dadb4c035", 1000),
+      u("1604654894610-df63bc536371", 1000),
+      u("1607779097040-26e80aa78e66", 1000),
+      u("1599387737875-3a48f7b6dfd1", 1000),
+    ],
+  },
+  barber: {
+    hero: u("1521498542256-5aeb47ba2b36"),
+    about: u("1599351431202-1e0f0137899a", 1000),
+    gallery: [
+      u("1521498542256-5aeb47ba2b36", 1000),
+      u("1503951914875-452162b0f3f1", 1000),
+      u("1622286342621-4bd786c2447c", 1000),
+      u("1605497788044-5a32c7078486", 1000),
+    ],
+  },
+  beauty: {
+    hero: u("1522337360788-8b13dee7a37e"),
+    about: u("1487412947147-5cebf100ffc2", 1000),
+    gallery: [
+      u("1522337360788-8b13dee7a37e", 1000),
+      u("1487412947147-5cebf100ffc2", 1000),
+      u("1607779097040-26e80aa78e66", 1000),
+      u("1604654894610-df63bc536371", 1000),
+    ],
+  },
+  fitness: {
+    hero: u("1571019613454-1cb2f99b2d8b"),
+    about: u("1534438327276-14e5300c3a48", 1000),
+    gallery: [
+      u("1571019613454-1cb2f99b2d8b", 1000),
+      u("1534438327276-14e5300c3a48", 1000),
+      u("1518611012118-696072aa579a", 1000),
+      u("1517836357463-d25dfeac3438", 1000),
+    ],
+  },
+  mover: {
+    hero: u("1600518464441-9154a4dea21b"),
+    about: u("1530124566582-a618bc2615dc", 1000),
+    gallery: [
+      u("1600518464441-9154a4dea21b", 1000),
+      u("1530124566582-a618bc2615dc", 1000),
+      u("1611189458701-23f15f86d0eb", 1000),
+      u("1558997519-5cd1e5e83c20", 1000),
+    ],
+  },
+  pet: {
+    hero: u("1601758228041-f3b2795255f1"),
+    about: u("1583337130417-3346a1be7dee", 1000),
+    gallery: [
+      u("1601758228041-f3b2795255f1", 1000),
+      u("1583337130417-3346a1be7dee", 1000),
+      u("1548199973-03cce0bbc87b", 1000),
+      u("1587300003388-59208cc962cb", 1000),
+    ],
+  },
+  general: {
+    hero: u("1503387762-bf3d39b32de9"),
+    about: u("1581094271901-8022df4466f9", 1000),
+    gallery: [
+      u("1503387762-bf3d39b32de9", 1000),
+      u("1581094271901-8022df4466f9", 1000),
+      u("1504307651254-35680f356dfd", 1000),
+      u("1572025442646-866d16c84a54", 1000),
+    ],
+  },
   default: DEFAULT_PHOTOS,
 };
 
+// Common informal/alternate names → canonical key in TRADE_PLACEHOLDERS.
+// Keeps `BUSINESS.tradeType: "plumber"` from falling into the generic
+// placeholder bucket when the curated entry is named `plumbing`.
+const TRADE_ALIASES: Record<string, string> = {
+  painter: "painting",
+  painters: "painting",
+  electrician: "electrical",
+  electricians: "electrical",
+  plumber: "plumbing",
+  plumbers: "plumbing",
+  roofer: "roofing",
+  roofers: "roofing",
+  landscaper: "lawn-care",
+  landscapers: "lawn-care",
+  landscaping: "lawn-care",
+  lawn: "lawn-care",
+  "auto-detail": "auto-detailing",
+  detailing: "auto-detailing",
+  "junk-hauling": "junk-removal",
+  tree: "tree-services",
+  "tree-service": "tree-services",
+  arborist: "tree-services",
+  cleaner: "cleaning",
+  cleaners: "cleaning",
+  movers: "mover",
+  moving: "mover",
+  gym: "fitness",
+  trainer: "fitness",
+  "personal-trainer": "fitness",
+  hair: "salon",
+  nails: "salon",
+  "nail-salon": "salon",
+  spa: "beauty",
+  esthetics: "beauty",
+  lash: "beauty",
+  pets: "pet",
+  groomer: "pet",
+  "pet-grooming": "pet",
+  "general-contractor": "general",
+  contractor: "general",
+  remodeling: "general",
+  construction: "general",
+};
+
+/**
+ * Returns the list of trade keys with a curated photo set (excluding
+ * `default`). Used by tooling (e.g. sync-business-info.mjs) to warn when
+ * BUSINESS.tradeType doesn't match any known entry.
+ */
+export function getKnownTradeKeys(): string[] {
+  return Object.keys(TRADE_PLACEHOLDERS)
+    .filter((k) => k !== "default")
+    .concat(Object.keys(TRADE_ALIASES))
+    .sort();
+}
+
 /**
  * Return placeholder photos for a given trade type, falling back to a
- * generic default if the trade isn't in our curated list.
+ * generic "Add Photo" placeholder card if the trade isn't in our curated
+ * list. Honors common alternate names (e.g. "plumber" → "plumbing").
  */
 export function getPlaceholders(tradeType: string): TradePhotos {
   const key = tradeType.toLowerCase().trim();
-  return TRADE_PLACEHOLDERS[key] || DEFAULT_PHOTOS;
+  const canonical = TRADE_ALIASES[key] || key;
+  return TRADE_PLACEHOLDERS[canonical] || DEFAULT_PHOTOS;
 }
