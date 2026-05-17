@@ -45,6 +45,7 @@ Tick boxes as you go. Don't ship to production with any unchecked.
 - [ ] Build succeeds — no broken imports, no missing assets
 - [ ] Vercel preview URL renders correctly (mobile + desktop)
 - [ ] Cloudflare Pages bundle — auto-generated on every build at `~/Desktop/{slug}-cloudflare-pages/`. Drag the folder (or `.zip`) into Cloudflare Pages → Direct Upload if deploying there instead of Vercel.
+- [ ] Vercel preview URL — auto-generated at end of every build. Look for the ✅ block in terminal output. Send THIS URL to the client for design approval. Once approved, push to GitHub for production deploy (real domain attaches automatically via the standard Vercel project + DNS flow).
 
 ## Domain (skip if PITCH_MODE=true)
 - [ ] Domain registered on Cloudflare (or transferred in)

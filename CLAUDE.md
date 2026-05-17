@@ -59,6 +59,19 @@ Useful for:
 
 Implementation: `scripts/package-for-pages.mjs`, wired as a `postbuild` step in `artifacts/trades-template/package.json`. Runs after every successful Vite build. On CI / headless environments (no `~/Desktop`), it exits silently with code 0 so the build is never blocked.
 
+## Auto Vercel preview deploy
+Every build runs `scripts/deploy-vercel-preview.mjs` as the LAST postbuild step. It:
+- Uploads `dist/public` to Vercel via CLI as a named preview project (`{slug}-demo`)
+- Spits out the `.vercel.app` URL in terminal
+- Skips silently if `VERCEL_TOKEN` isn't set (CI, headless environments)
+
+The Cloudflare Pages bundle on ~/Desktop is still generated as backup — useful if Vercel is rate-limited or you want a Cloudflare-hosted demo.
+
+For new clients without a real domain yet: this Vercel preview URL IS what you send the client to review the design before launch. After approval, push to GitHub for the production deploy via the standard Vercel project + DNS flow.
+
+VERCEL_TOKEN must be exported in your shell before running builds. Add to ~/.zshrc:
+  export VERCEL_TOKEN=vcp_xxx
+
 ## Status
 ✅ Patched and Neon-ready. Not deployed (templates aren't deployed; clones are).
 

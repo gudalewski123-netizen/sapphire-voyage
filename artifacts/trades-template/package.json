@@ -9,7 +9,7 @@
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prebuild": "bash ../../scripts/check-config.sh",
-    "postbuild": "node ../../scripts/package-for-pages.mjs"
+    "postbuild": "node ../../scripts/package-for-pages.mjs && node ../../scripts/deploy-vercel-preview.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
