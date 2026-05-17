@@ -8,6 +8,10 @@
 //  bundle is the offline-safe backup; this script gets a live preview
 //  URL the operator can hand to a client for design approval before
 //  the production domain is wired up.
+//
+//  Contract: this script must NEVER fail a build. Every error path
+//  exits 0 — Cloudflare bundle (which already ran via &&) is the
+//  build artifact of record.
 // ============================================================
 import { readFile, access } from "node:fs/promises";
 import { execSync } from "node:child_process";
@@ -21,7 +25,7 @@ const CONFIG_JSON = `${ROOT}/business.config.json`;
 
 const token = process.env.VERCEL_TOKEN;
 if (!token || token.length < 10) {
-  console.log("\n⚠ VERCEL_TOKEN not set — skipping Vercel preview deploy.");
+  console.log("\n⚠ VERCEL_TOKEN not set or invalid format — skipping Vercel preview deploy.");
   console.log("  Set in your shell: export VERCEL_TOKEN=vcp_xxx\n");
   process.exit(0);
 }
@@ -29,8 +33,8 @@ if (!token || token.length < 10) {
 try {
   await access(DIST);
 } catch {
-  console.error(`✗ Build output not found at ${DIST}. Run the Vite build first.`);
-  process.exit(1);
+  console.error(`⚠ Build output not found at ${DIST} — skipping Vercel deploy.`);
+  process.exit(0);
 }
 
 const biz = JSON.parse(await readFile(CONFIG_JSON, "utf8"));
@@ -50,7 +54,8 @@ try {
   );
 } catch (err) {
   console.error("✗ Vercel deploy failed. See output above.");
-  process.exit(1);
+  console.error("  (Build artifact is still valid — Cloudflare bundle was written successfully.)");
+  process.exit(0);
 }
 
 const match = stdout.match(/https:\/\/[a-z0-9-]+\.vercel\.app/i);
