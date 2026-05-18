@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback, type FormEvent } from "react";
+import { useEffect, useMemo, useState, useCallback, type FormEvent } from "react";
 import { Link } from "wouter";
 import {
   PhoneCall, Mail, ArrowLeft, Inbox,
   RefreshCw, LogOut, Trash2, ChevronDown, ChevronRight, AlertCircle,
-  KeyRound, AlertTriangle,
+  KeyRound, AlertTriangle, Download, X,
 } from "lucide-react";
 import { BUSINESS, THEME } from "../config";
 
@@ -47,6 +47,283 @@ const STATUS_COLORS: Record<Status, string> = {
   won: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
   lost: "bg-red-500/20 text-red-300 border-red-500/30",
 };
+
+const EXPORT_COLUMNS = ["Date", "Name", "Email", "Phone", "Service", "Message", "Status", "Notes"] as const;
+
+function slugify(name: string): string {
+  return (name || "leads")
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "leads";
+}
+
+function todayISO(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function leadRow(l: Lead): string[] {
+  return [
+    new Date(l.createdAt).toLocaleString(),
+    l.name || "",
+    l.email || "",
+    l.phone || "",
+    l.service || "",
+    l.message || "",
+    l.status,
+    l.adminNotes || "",
+  ];
+}
+
+// RFC 4180 — wrap any field containing comma, quote, CR, or LF in quotes;
+// double any embedded quote. Always emit CRLF between records.
+function csvEscape(field: string): string {
+  if (/[",\r\n]/.test(field)) {
+    return `"${field.replace(/"/g, '""')}"`;
+  }
+  return field;
+}
+
+function buildCsv(leads: Lead[]): string {
+  const lines: string[] = [];
+  lines.push(EXPORT_COLUMNS.map(csvEscape).join(","));
+  for (const lead of leads) {
+    lines.push(leadRow(lead).map(csvEscape).join(","));
+  }
+  return lines.join("\r\n");
+}
+
+function triggerDownload(filename: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function downloadCsv(leads: Lead[], slug: string) {
+  const csv = buildCsv(leads);
+  // UTF-8 BOM so Excel opens accented characters correctly
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+  triggerDownload(`${slug}-leads-${todayISO()}.csv`, blob);
+}
+
+async function downloadPdf(leads: Lead[], slug: string, filterLabel: string) {
+  const [{ default: jsPDF }, autoTableMod] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
+  const autoTable = (autoTableMod as { default: (doc: unknown, opts: unknown) => void }).default;
+
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "letter" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 36;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text(BUSINESS.name, margin, 48);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.text("Leads Export", margin, 66);
+
+  doc.setFontSize(10);
+  const dateLabel = new Date().toLocaleDateString();
+  doc.text(dateLabel, pageWidth - margin, 48, { align: "right" });
+  doc.text(`Filter: ${filterLabel}`, pageWidth - margin, 66, { align: "right" });
+
+  autoTable(doc, {
+    head: [Array.from(EXPORT_COLUMNS)],
+    body: leads.map(leadRow),
+    startY: 84,
+    margin: { left: margin, right: margin },
+    styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+    headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 245, 245] },
+    columnStyles: {
+      0: { cellWidth: 80 },
+      1: { cellWidth: 90 },
+      2: { cellWidth: 110 },
+      3: { cellWidth: 80 },
+      4: { cellWidth: 80 },
+      5: { cellWidth: 160 },
+      6: { cellWidth: 50 },
+      7: { cellWidth: 80 },
+    },
+    didDrawPage: (data: { pageNumber: number }) => {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      doc.setFontSize(9);
+      doc.setTextColor(110);
+      doc.text(
+        `Total leads: ${leads.length}  •  Filter: ${filterLabel}`,
+        margin,
+        pageHeight - 18,
+      );
+      doc.text(
+        `Page ${data.pageNumber}`,
+        pageWidth - margin,
+        pageHeight - 18,
+        { align: "right" },
+      );
+      doc.setTextColor(0);
+    },
+  });
+
+  doc.save(`${slug}-leads-${todayISO()}.pdf`);
+}
+
+function DownloadModal({
+  open,
+  onClose,
+  allLeads,
+  filteredLeads,
+  currentFilter,
+  onDone,
+}: {
+  open: boolean;
+  onClose: () => void;
+  allLeads: Lead[];
+  filteredLeads: Lead[];
+  currentFilter: Status | "all";
+  onDone: (count: number) => void;
+}) {
+  const filterActive = currentFilter !== "all";
+  const [csv, setCsv] = useState(true);
+  const [pdf, setPdf] = useState(true);
+  const [scope, setScope] = useState<"all" | "filtered">(filterActive ? "filtered" : "all");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setCsv(true);
+      setPdf(true);
+      setScope(filterActive ? "filtered" : "all");
+      setErr(null);
+    }
+  }, [open, filterActive]);
+
+  if (!open) return null;
+
+  const targetLeads = scope === "filtered" ? filteredLeads : allLeads;
+  const slug = slugify(BUSINESS.name);
+  const filterLabel = scope === "filtered" ? currentFilter : "all";
+
+  async function handleDownload() {
+    if (!csv && !pdf) {
+      setErr("Pick at least one format.");
+      return;
+    }
+    if (targetLeads.length === 0) {
+      setErr("Nothing to export — the selected scope has zero leads.");
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    try {
+      if (csv) await downloadCsv(targetLeads, slug);
+      if (pdf) await downloadPdf(targetLeads, slug, filterLabel);
+      onDone(targetLeads.length);
+      onClose();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Download failed.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md bg-card border border-white/10 rounded-xl p-6 space-y-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-condensed text-xl font-bold uppercase tracking-widest">Download leads</h3>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-white -mt-1 -mr-1 p-1"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Format</div>
+          <label className="flex items-center gap-3 px-3 py-2 rounded border border-white/10 cursor-pointer hover:bg-white/5">
+            <input type="checkbox" checked={pdf} onChange={(e) => setPdf(e.target.checked)} className="accent-primary" />
+            <span className="text-sm text-white">PDF <span className="text-muted-foreground">(printable, branded)</span></span>
+          </label>
+          <label className="flex items-center gap-3 px-3 py-2 rounded border border-white/10 cursor-pointer hover:bg-white/5">
+            <input type="checkbox" checked={csv} onChange={(e) => setCsv(e.target.checked)} className="accent-primary" />
+            <span className="text-sm text-white">CSV <span className="text-muted-foreground">(opens in Excel / Sheets)</span></span>
+          </label>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Scope</div>
+          <label className="flex items-center gap-3 px-3 py-2 rounded border border-white/10 cursor-pointer hover:bg-white/5">
+            <input
+              type="radio"
+              name="scope"
+              checked={scope === "all"}
+              onChange={() => setScope("all")}
+              className="accent-primary"
+            />
+            <span className="text-sm text-white">All leads <span className="text-muted-foreground">({allLeads.length})</span></span>
+          </label>
+          <label className={`flex items-center gap-3 px-3 py-2 rounded border border-white/10 cursor-pointer hover:bg-white/5 ${!filterActive ? "opacity-60" : ""}`}>
+            <input
+              type="radio"
+              name="scope"
+              checked={scope === "filtered"}
+              onChange={() => setScope("filtered")}
+              disabled={!filterActive}
+              className="accent-primary"
+            />
+            <span className="text-sm text-white">
+              Currently-filtered <span className="text-muted-foreground">({filteredLeads.length}{filterActive ? ` · ${currentFilter}` : " · no filter"})</span>
+            </span>
+          </label>
+        </div>
+
+        {err && (
+          <div className="flex items-center gap-2 text-red-300 bg-red-500/10 border border-red-500/30 text-sm rounded p-3">
+            <AlertCircle className="w-4 h-4 shrink-0" /> {err}
+          </div>
+        )}
+
+        <div className="flex items-center justify-end gap-2 pt-2">
+          <button
+            onClick={onClose}
+            disabled={busy}
+            className="px-4 py-2 rounded border border-white/10 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void handleDownload()}
+            disabled={busy}
+            className="flex items-center gap-2 px-5 py-2 rounded bg-primary hover:bg-primary/90 disabled:opacity-60 text-white text-sm font-bold uppercase tracking-wider"
+          >
+            <Download className="w-4 h-4" /> {busy ? "Preparing…" : "Download"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function LoginScreen({
   onLogin,
@@ -137,6 +414,8 @@ function LeadsList({ token, onLogout }: { token: string; onLogout: () => void })
   const [err, setErr] = useState<string | null>(null);
   const [filter, setFilter] = useState<Status | "all">("all");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -172,8 +451,17 @@ function LeadsList({ token, onLogout }: { token: string; onLogout: () => void })
     if (res.ok) await load();
   }
 
-  const filtered = (leads || []).filter((l) => filter === "all" || l.status === filter);
+  const filtered = useMemo(
+    () => (leads || []).filter((l) => filter === "all" || l.status === filter),
+    [leads, filter],
+  );
   const counts = (leads || []).reduce((acc, l) => { acc[l.status] = (acc[l.status] || 0) + 1; return acc; }, {} as Record<string, number>);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2800);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   return (
     <div className="space-y-6">
@@ -191,6 +479,14 @@ function LeadsList({ token, onLogout }: { token: string; onLogout: () => void })
             {s} {s !== "all" && counts[s] !== undefined && `(${counts[s]})`}
           </button>
         ))}
+        <button
+          onClick={() => setDownloadOpen(true)}
+          disabled={!leads || leads.length === 0}
+          className="flex items-center gap-2 px-3 py-1.5 rounded border border-white/10 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Export leads as CSV and/or PDF"
+        >
+          <Download className="w-3.5 h-3.5" /> Download
+        </button>
         <button onClick={() => void load()} className="p-2 rounded border border-white/10 text-muted-foreground hover:text-white" title="Refresh">
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -303,6 +599,24 @@ function LeadsList({ token, onLogout }: { token: string; onLogout: () => void })
           );
         })}
       </div>
+
+      <DownloadModal
+        open={downloadOpen}
+        onClose={() => setDownloadOpen(false)}
+        allLeads={leads || []}
+        filteredLeads={filtered}
+        currentFilter={filter}
+        onDone={(count) => setToast(`Downloaded ${count} lead${count === 1 ? "" : "s"}`)}
+      />
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] bg-emerald-500/90 text-white text-sm font-bold uppercase tracking-wider px-4 py-2 rounded-lg shadow-lg backdrop-blur"
+        >
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

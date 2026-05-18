@@ -256,6 +256,9 @@ Endpoints:
 - `PATCH /api/admin/leads/:id` — update status or adminNotes
 - `DELETE /api/admin/leads/:id` — hard delete
 
+## Admin page feature spec
+See ADMIN_FEATURES.md for the full required feature set on every /admin page. Future Claude sessions modifying the admin MUST preserve all listed features (lead capture, dashboard, status filters, CSV/PDF export with format + scope picker, Account tab, JWT auth).
+
 ### Statuses
 `new` → `contacted` → `won` or `lost`. Color-coded badges in the UI. Click any lead row to expand and update status / add internal notes.
 

@@ -62,6 +62,7 @@ Tick boxes as you go. Don't ship to production with any unchecked.
 ## Leads dashboard
 - [ ] Visit `/admin` on the deployed site
 - [ ] Log in with default `Admin` / `Password` (or new credentials if already rotated)
+- [ ] Admin export — log into /admin, click Download → confirm both CSV and PDF generate with the current leads, both files land in browser Downloads, filenames match {slug}-leads-{date}.{csv|pdf} pattern.
 - [ ] Submit a test quote on the public site → verify it appears in /admin within 5s
 - [ ] Update its status to "contacted" → reload → status persists
 - [ ] Click an email link → opens mail client; click a phone link → starts a call
