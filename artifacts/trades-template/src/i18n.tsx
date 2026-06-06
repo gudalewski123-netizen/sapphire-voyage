@@ -95,6 +95,30 @@ const DICT = {
         "We serve private clients, corporate guests, wedding parties, influencers, and artists — anyone who wants to arrive relaxed and on time. Every trip is private, every quote is upfront, and every detail is handled.",
       badges: ["Licensed & Insured", "Bilingual Chauffeur", "Flat, Upfront Pricing", "Flight Tracking"],
     },
+    experience: {
+      eyebrow: "The Experience",
+      title: "Travel in a Class of Its Own",
+      body: "Late-model luxury vehicles, professional bilingual chauffeurs, and a service tuned to every detail of your journey — from the moment you land to your final destination.",
+      points: [
+        "Immaculate, late-model vehicles",
+        "Professional, discreet chauffeurs",
+        "Complimentary water & device charging",
+        "Flight tracking & meet-and-greet",
+      ],
+      galleryCaption: "Our Fleet & Journeys",
+    },
+    stats: [
+      { value: "100%", label: "Private, door-to-door" },
+      { value: "24/7", label: "Island-wide service" },
+      { value: "$150+", label: "Transparent flat rates" },
+      { value: "EN / ES", label: "Bilingual chauffeurs" },
+    ],
+    finalCta: {
+      eyebrow: "Reserve Today",
+      title: "Your Voyage Awaits",
+      body: "Reserve your private ride across Puerto Rico in under a minute.",
+    },
+    scrollHint: "Scroll to explore",
     booking: {
       title: "Book Your Ride",
       subtitle: "Pick an available time, tell us about your trip, and we'll confirm.",
@@ -252,6 +276,30 @@ const DICT = {
         "Atendemos clientes privados, huéspedes corporativos, bodas, influencers y artistas — cualquiera que quiera llegar relajado y a tiempo. Cada viaje es privado, cada cotización es clara, y cada detalle está cubierto.",
       badges: ["Licencia y Seguro", "Chofer Bilingüe", "Precio Fijo y Claro", "Rastreo de Vuelos"],
     },
+    experience: {
+      eyebrow: "La Experiencia",
+      title: "Viaja en una Clase Aparte",
+      body: "Vehículos de lujo de último modelo, choferes profesionales bilingües y un servicio cuidado en cada detalle de tu viaje — desde que aterrizas hasta tu destino final.",
+      points: [
+        "Vehículos impecables y de último modelo",
+        "Choferes profesionales y discretos",
+        "Agua de cortesía y carga para dispositivos",
+        "Rastreo de vuelos y recibimiento personal",
+      ],
+      galleryCaption: "Nuestra Flota y Viajes",
+    },
+    stats: [
+      { value: "100%", label: "Privado, puerta a puerta" },
+      { value: "24/7", label: "Servicio en toda la isla" },
+      { value: "$150+", label: "Tarifas fijas y claras" },
+      { value: "EN / ES", label: "Choferes bilingües" },
+    ],
+    finalCta: {
+      eyebrow: "Reserva Hoy",
+      title: "Tu Viaje te Espera",
+      body: "Reserva tu viaje privado por todo Puerto Rico en menos de un minuto.",
+    },
+    scrollHint: "Desliza para explorar",
     booking: {
       title: "Reserva tu Viaje",
       subtitle: "Elige una hora disponible, cuéntanos sobre tu viaje y te confirmamos.",

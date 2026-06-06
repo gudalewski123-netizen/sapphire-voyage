@@ -94,7 +94,7 @@ export function Nav() {
         <div className="hidden lg:flex items-center gap-7">
           <button onClick={() => goSection("services")} className="text-sm font-medium text-white/80 hover:text-white transition-colors">{t.nav.services}</button>
           <button onClick={() => goSection("how")} className="text-sm font-medium text-white/80 hover:text-white transition-colors">{t.nav.howItWorks}</button>
-          <button onClick={() => goSection("about")} className="text-sm font-medium text-white/80 hover:text-white transition-colors">{t.nav.fleet}</button>
+          <button onClick={() => goSection("experience")} className="text-sm font-medium text-white/80 hover:text-white transition-colors">{t.nav.fleet}</button>
           <Link href="/account" className="flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors">
             <UserRound className="w-4 h-4" /> {user ? t.nav.account : t.nav.login}
           </Link>
@@ -115,7 +115,7 @@ export function Nav() {
         <div className="lg:hidden bg-background/98 backdrop-blur-xl border-t border-white/10 px-6 py-6 flex flex-col gap-4">
           <button onClick={() => goSection("services")} className="text-lg font-medium text-left text-white/90">{t.nav.services}</button>
           <button onClick={() => goSection("how")} className="text-lg font-medium text-left text-white/90">{t.nav.howItWorks}</button>
-          <button onClick={() => goSection("about")} className="text-lg font-medium text-left text-white/90">{t.nav.fleet}</button>
+          <button onClick={() => goSection("experience")} className="text-lg font-medium text-left text-white/90">{t.nav.fleet}</button>
           <Link href="/account" onClick={() => setMenuOpen(false)} className="text-lg font-medium text-left text-white/90 flex items-center gap-2">
             <UserRound className="w-5 h-5" /> {user ? t.nav.account : t.nav.login}
           </Link>
