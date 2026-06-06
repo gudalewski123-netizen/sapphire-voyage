@@ -29,7 +29,11 @@ export default function BookingPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [time, setTime] = useState<string>("");
 
-  const [serviceType, setServiceType] = useState<string>("airport");
+  const [serviceType, setServiceType] = useState<string>(() => {
+    if (typeof window === "undefined") return "airport";
+    const q = new URLSearchParams(window.location.search).get("service");
+    return q && (SERVICE_KEYS as readonly string[]).includes(q) ? q : "airport";
+  });
   const [tripType, setTripType] = useState<string>("one-way");
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");

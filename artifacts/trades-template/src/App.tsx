@@ -25,6 +25,50 @@ const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   tour: Camera,
 };
 
+// Hero background slideshow — a curated, cohesive set that tells the brand story.
+const HERO_SLIDES = ["/hero.jpg", "/fleet-2.jpg", "/chauffeur.jpg", "/journey.jpg", "/island.jpg"];
+
+function HeroSlideshow() {
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => setI((p) => (p + 1) % HERO_SLIDES.length), 5500);
+    return () => clearInterval(id);
+  }, [paused]);
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      {HERO_SLIDES.map((src, idx) => (
+        <div
+          key={src}
+          className={`absolute inset-0 transition-opacity duration-[1400ms] ease-in-out ${idx === i ? "opacity-100" : "opacity-0"}`}
+          aria-hidden={idx !== i}
+        >
+          <img src={src} alt="" className={`w-full h-full object-cover ${idx === i ? "slide-kenburns" : ""}`} />
+        </div>
+      ))}
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/55" />
+      <div className="absolute -top-1/4 -right-1/4 w-[55rem] h-[55rem] rounded-full bg-primary/10 blur-[140px]" />
+
+      {/* Interactive slide controls */}
+      <div className="absolute bottom-8 right-6 md:right-10 z-20 flex items-center gap-2.5">
+        {HERO_SLIDES.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => { setI(idx); setPaused(true); }}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            aria-label={`View slide ${idx + 1}`}
+            className={`h-2 rounded-full transition-all duration-300 ${idx === i ? "w-9 bg-gold" : "w-2.5 bg-white/40 hover:bg-white/80"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Lightweight scroll-reveal — no framer-motion (avoids the monorepo's
 // duplicate-React hook issue). IntersectionObserver toggles a CSS class.
 function Reveal({
@@ -82,12 +126,7 @@ function LandingPage() {
 
       {/* ===== Hero ===== */}
       <section id="hero" className="relative min-h-[100svh] flex items-center">
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <img src="/hero.jpg" alt="Luxury private car at dusk" className="hero-zoom w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-          <div className="absolute -top-1/4 -right-1/4 w-[55rem] h-[55rem] rounded-full bg-primary/10 blur-[140px]" />
-        </div>
+        <HeroSlideshow />
 
         <div className="container mx-auto px-6 relative z-10 pt-28 pb-20">
           <div className="max-w-3xl">
@@ -115,8 +154,24 @@ function LandingPage() {
                 </a>
               </div>
             </Reveal>
-            <Reveal delay={0.4}>
-              <div className="mt-12 flex flex-wrap items-center gap-x-7 gap-y-3">
+            <Reveal delay={0.35}>
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                {t.services.items.map((s) => {
+                  const Icon = SERVICE_ICONS[s.key] ?? Car;
+                  return (
+                    <Link
+                      key={s.key}
+                      href={`/book?service=${s.key}`}
+                      className="group inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-sm text-sm text-white/80 hover:border-gold/60 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <Icon className="w-4 h-4 text-gold/80 group-hover:text-gold transition-colors" /> {s.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </Reveal>
+            <Reveal delay={0.45}>
+              <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3">
                 {[t.hero.stat1, t.hero.stat2, t.hero.stat3].map((s, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm font-medium text-white/75">
                     <CheckCircle2 className="w-4 h-4 text-gold" /> {s}
@@ -243,10 +298,10 @@ function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
             {t.destinations.list.map((d, i) => (
               <Reveal key={d} delay={(i % 4) * 0.06}>
-                <div className="bg-card/70 backdrop-blur-sm border border-white/10 rounded-xl p-5 flex items-center gap-3 hover:border-gold/40 hover:bg-card transition-all h-full">
+                <Link href="/book" className="group bg-card/70 backdrop-blur-sm border border-white/10 rounded-xl p-5 flex items-center gap-3 hover:border-gold/50 hover:bg-card hover:-translate-y-0.5 transition-all h-full">
                   <MapPin className="w-5 h-5 text-gold shrink-0" />
-                  <span className="text-sm font-medium text-white/90">{d}</span>
-                </div>
+                  <span className="text-sm font-medium text-white/90 group-hover:text-white">{d}</span>
+                </Link>
               </Reveal>
             ))}
           </div>

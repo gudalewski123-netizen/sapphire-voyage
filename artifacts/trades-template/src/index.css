@@ -105,6 +105,13 @@
 @keyframes floatDown { 0%,100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
 .float-down { animation: floatDown 1.8s ease-in-out infinite; }
 
+/* Hero slideshow Ken-Burns drift on the active slide */
+@keyframes kenburns { from { transform: scale(1.02); } to { transform: scale(1.13); } }
+.slide-kenburns { animation: kenburns 7s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .slide-kenburns { animation: none; }
+}
+
 /* react-day-picker — dark sapphire theme */
 .rdp-wrap {
   --rdp-accent-color: hsl(var(--primary));
