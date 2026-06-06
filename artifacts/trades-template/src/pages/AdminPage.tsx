@@ -4,6 +4,7 @@ import {
   PhoneCall, Mail, ArrowLeft, Inbox,
   RefreshCw, LogOut, Trash2, ChevronDown, ChevronRight, AlertCircle,
   KeyRound, AlertTriangle, Download, X,
+  CalendarClock, CalendarX2, MapPin, Plus, Users, Car,
 } from "lucide-react";
 import { BUSINESS, THEME } from "../config";
 
@@ -19,7 +20,52 @@ import { BUSINESS, THEME } from "../config";
 // ============================================================
 
 type Status = "new" | "contacted" | "won" | "lost";
-type Tab = "leads" | "account";
+type Tab = "bookings" | "leads" | "availability" | "account";
+
+type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+
+interface Booking {
+  id: number;
+  createdAt: string;
+  customerId: number | null;
+  name: string;
+  email: string;
+  phone: string;
+  serviceType: string;
+  tripType: string;
+  pickup: string;
+  dropoff: string;
+  passengers: number;
+  date: string;
+  time: string;
+  returnDate: string | null;
+  returnTime: string | null;
+  notes: string | null;
+  status: BookingStatus;
+  priceQuote: string | null;
+  adminNotes: string | null;
+}
+
+interface BlockedSlot {
+  id: number;
+  date: string;
+  time: string | null;
+  reason: string | null;
+}
+
+const BOOKING_STATUS_COLORS: Record<BookingStatus, string> = {
+  pending: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+  confirmed: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  completed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+  cancelled: "bg-red-500/20 text-red-300 border-red-500/30",
+};
+
+function fmtSlot(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+}
 
 interface Lead {
   id: number;
@@ -739,6 +785,287 @@ function AccountTab({
   );
 }
 
+function BookingsList({ token, onLogout }: { token: string; onLogout: () => void }) {
+  const [bookings, setBookings] = useState<Booking[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [filter, setFilter] = useState<BookingStatus | "all">("all");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    setErr(null);
+    try {
+      const res = await fetch("/api/admin/bookings", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401 || res.status === 403) { onLogout(); return; }
+      if (!res.ok) { setErr(`Failed (${res.status})`); return; }
+      setBookings(await res.json());
+    } catch {
+      setErr("Network error");
+    }
+  }, [token, onLogout]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function update(id: number, changes: Partial<Pick<Booking, "status" | "priceQuote" | "adminNotes">>) {
+    const res = await fetch(`/api/admin/bookings/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(changes),
+    });
+    if (res.ok) await load();
+  }
+
+  async function remove(id: number) {
+    if (!confirm("Delete this booking permanently?")) return;
+    const res = await fetch(`/api/admin/bookings/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) await load();
+  }
+
+  const filtered = useMemo(
+    () => (bookings || []).filter((b) => filter === "all" || b.status === filter),
+    [bookings, filter],
+  );
+  const counts = (bookings || []).reduce((acc, b) => { acc[b.status] = (acc[b.status] || 0) + 1; return acc; }, {} as Record<string, number>);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="font-condensed text-2xl font-bold uppercase tracking-widest mr-auto flex items-center gap-2">
+          <Car className="w-6 h-6 text-primary" /> Bookings <span className="text-muted-foreground">({bookings?.length ?? 0})</span>
+        </h2>
+        {(["all", "pending", "confirmed", "completed", "cancelled"] as const).map((s) => (
+          <button
+            key={s} onClick={() => setFilter(s)}
+            className={`px-3 py-1.5 rounded border text-xs font-bold uppercase tracking-wider transition ${
+              filter === s ? "bg-primary text-white border-primary" : "bg-card border-white/10 text-muted-foreground hover:text-white"
+            }`}
+          >
+            {s} {s !== "all" && counts[s] !== undefined && `(${counts[s]})`}
+          </button>
+        ))}
+        <button onClick={() => void load()} className="p-2 rounded border border-white/10 text-muted-foreground hover:text-white" title="Refresh">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {err && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded p-4 text-red-300">
+          {err} — is the backend deployed and is /api/admin/bookings accessible?
+        </div>
+      )}
+
+      {bookings === null && !err && <div className="text-muted-foreground text-center py-12">Loading…</div>}
+
+      {bookings !== null && filtered.length === 0 && (
+        <div className="text-muted-foreground text-center py-12 border border-white/8 rounded-xl bg-card">
+          <Inbox className="w-10 h-10 mx-auto mb-3 opacity-40" />
+          No bookings yet. Online ride bookings will appear here.
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {filtered.map((b) => {
+          const expanded = expandedId === b.id;
+          return (
+            <div key={b.id} className="bg-card border border-white/8 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setExpandedId(expanded ? null : b.id)}
+                className="w-full grid grid-cols-12 gap-3 items-center px-5 py-4 text-left hover:bg-white/3 transition"
+              >
+                <div className="col-span-4 sm:col-span-2 text-xs text-white font-mono flex items-center gap-1.5">
+                  <CalendarClock className="w-3.5 h-3.5 text-primary" /> {b.date}
+                </div>
+                <div className="col-span-3 sm:col-span-1 text-xs text-muted-foreground">{fmtSlot(b.time)}</div>
+                <div className="col-span-5 sm:col-span-3 font-medium text-white truncate">{b.name}</div>
+                <div className="hidden sm:block sm:col-span-3 text-muted-foreground truncate text-sm">{b.pickup} → {b.dropoff}</div>
+                <div className="hidden sm:flex sm:col-span-2 justify-end">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${BOOKING_STATUS_COLORS[b.status]}`}>{b.status}</span>
+                </div>
+                <div className="hidden sm:flex sm:col-span-1 justify-end text-muted-foreground">
+                  {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </div>
+              </button>
+
+              {expanded && (
+                <div className="border-t border-white/8 px-5 py-5 space-y-4 bg-background/30">
+                  <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                    <a href={`tel:${b.phone}`} className="flex items-center gap-2 text-primary hover:underline"><PhoneCall className="w-4 h-4" /> {b.phone}</a>
+                    <a href={`mailto:${b.email}`} className="flex items-center gap-2 text-primary hover:underline"><Mail className="w-4 h-4" /> {b.email}</a>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                    <div className="flex items-center gap-2 text-white"><MapPin className="w-4 h-4 text-muted-foreground" /> {b.pickup} → {b.dropoff}</div>
+                    <div className="flex items-center gap-2 text-white"><Users className="w-4 h-4 text-muted-foreground" /> {b.passengers} passenger{b.passengers === 1 ? "" : "s"}</div>
+                    <div className="text-muted-foreground">Service: <span className="text-white">{b.serviceType}</span></div>
+                    <div className="text-muted-foreground">Trip: <span className="text-white">{b.tripType}</span>{b.customerId ? <span className="ml-2 text-xs text-gold">· account</span> : null}</div>
+                  </div>
+                  {b.returnDate && (
+                    <div className="text-sm text-muted-foreground">Return: <span className="text-white">{b.returnDate} {b.returnTime ? fmtSlot(b.returnTime) : ""}</span></div>
+                  )}
+                  {b.notes && (
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Customer notes</div>
+                      <p className="text-white whitespace-pre-wrap text-sm">{b.notes}</p>
+                    </div>
+                  )}
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Status</div>
+                      <select
+                        value={b.status}
+                        onChange={(e) => void update(b.id, { status: e.target.value as BookingStatus })}
+                        className="w-full bg-card border border-white/10 rounded px-3 py-2 text-white text-sm"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Price quote</div>
+                      <input
+                        defaultValue={b.priceQuote || ""}
+                        onBlur={(e) => { if (e.target.value !== (b.priceQuote || "")) void update(b.id, { priceQuote: e.target.value }); }}
+                        placeholder="$150"
+                        className="w-full bg-card border border-white/10 rounded px-3 py-2 text-white text-sm placeholder:text-muted-foreground"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Internal notes</div>
+                    <textarea
+                      rows={2}
+                      defaultValue={b.adminNotes || ""}
+                      onBlur={(e) => { if (e.target.value !== (b.adminNotes || "")) void update(b.id, { adminNotes: e.target.value }); }}
+                      placeholder="Notes only you see (saves on blur)…"
+                      className="w-full bg-card border border-white/10 rounded px-3 py-2 text-white text-sm placeholder:text-muted-foreground resize-none"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button onClick={() => void remove(b.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                      <Trash2 className="w-3 h-3" /> Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AvailabilityTab({ token, onLogout }: { token: string; onLogout: () => void }) {
+  const [blocks, setBlocks] = useState<BlockedSlot[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    setErr(null);
+    try {
+      const res = await fetch("/api/admin/blocked-slots", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401 || res.status === 403) { onLogout(); return; }
+      if (!res.ok) { setErr(`Failed (${res.status})`); return; }
+      setBlocks(await res.json());
+    } catch {
+      setErr("Network error");
+    }
+  }, [token, onLogout]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function add(e: FormEvent) {
+    e.preventDefault();
+    if (!date) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const res = await fetch("/api/admin/blocked-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ date, time: time || undefined, reason: reason || undefined }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setErr(d?.error || `Failed (${res.status})`);
+      } else {
+        setDate(""); setTime(""); setReason("");
+        await load();
+      }
+    } catch {
+      setErr("Network error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(id: number) {
+    const res = await fetch(`/api/admin/blocked-slots/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) await load();
+  }
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <div>
+        <h2 className="font-condensed text-2xl font-bold uppercase tracking-widest flex items-center gap-2">
+          <CalendarX2 className="w-6 h-6 text-primary" /> Availability
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Block dates or specific times when you're unavailable. Blocked slots won't be bookable on the site. Leave the time empty to block the whole day.
+        </p>
+      </div>
+
+      <form onSubmit={add} className="bg-card border border-white/10 rounded-xl p-5 grid sm:grid-cols-4 gap-3 items-end">
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Date</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full bg-background border border-white/10 rounded px-3 py-2 text-white text-sm" />
+        </div>
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Time (optional)</label>
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} step={3600} className="w-full bg-background border border-white/10 rounded px-3 py-2 text-white text-sm" />
+        </div>
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Reason (optional)</label>
+          <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Personal, booked elsewhere…" className="w-full bg-background border border-white/10 rounded px-3 py-2 text-white text-sm placeholder:text-muted-foreground" />
+        </div>
+        <button type="submit" disabled={busy} className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-60 text-white px-4 py-2 rounded font-bold text-sm uppercase tracking-wider">
+          <Plus className="w-4 h-4" /> Block
+        </button>
+      </form>
+
+      {err && <div className="bg-red-500/10 border border-red-500/30 rounded p-3 text-red-300 text-sm">{err}</div>}
+
+      {blocks === null && <div className="text-muted-foreground text-center py-8">Loading…</div>}
+      {blocks && blocks.length === 0 && (
+        <div className="text-muted-foreground text-center py-10 border border-white/8 rounded-xl bg-card">No blocked dates. Your full schedule is open for booking.</div>
+      )}
+      {blocks && blocks.length > 0 && (
+        <div className="space-y-2">
+          {blocks.map((b) => (
+            <div key={b.id} className="flex items-center justify-between bg-card border border-white/8 rounded-lg px-4 py-3">
+              <div className="flex items-center gap-3 text-sm">
+                <CalendarX2 className="w-4 h-4 text-primary" />
+                <span className="text-white font-medium">{b.date}</span>
+                <span className="text-muted-foreground">{b.time ? fmtSlot(b.time) : "All day"}</span>
+                {b.reason && <span className="text-muted-foreground italic">· {b.reason}</span>}
+              </div>
+              <button onClick={() => void remove(b.id)} className="text-red-400 hover:text-red-300 p-1" title="Remove block">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() =>
     typeof window === "undefined" ? null : window.localStorage.getItem(TOKEN_KEY),
@@ -747,7 +1074,7 @@ export default function AdminPage() {
     typeof window === "undefined" ? "" : window.localStorage.getItem(USERNAME_KEY) ?? "",
   );
   const [me, setMe] = useState<MeResponse | null>(null);
-  const [tab, setTab] = useState<Tab>("leads");
+  const [tab, setTab] = useState<Tab>("bookings");
   const [loginMessage, setLoginMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -798,7 +1125,7 @@ export default function AdminPage() {
     setToken(null);
     setUsername("");
     setMe(null);
-    setTab("leads");
+    setTab("bookings");
   }
 
   function handleCredentialsChanged() {
@@ -807,7 +1134,7 @@ export default function AdminPage() {
     setToken(null);
     setUsername("");
     setMe(null);
-    setTab("leads");
+    setTab("bookings");
     setLoginMessage("Credentials updated. Sign in with your new username and password.");
   }
 
@@ -829,7 +1156,9 @@ export default function AdminPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex bg-card border border-white/10 rounded overflow-hidden">
+              <button onClick={() => setTab("bookings")} className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${tab === "bookings" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}>Bookings</button>
               <button onClick={() => setTab("leads")} className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${tab === "leads" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}>Leads</button>
+              <button onClick={() => setTab("availability")} className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${tab === "availability" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}>Availability</button>
               <button onClick={() => setTab("account")} className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${tab === "account" ? "bg-primary text-white" : "text-muted-foreground hover:text-white"}`}>Account</button>
             </div>
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground hidden md:inline">
@@ -856,7 +1185,9 @@ export default function AdminPage() {
       )}
 
       <main className="container mx-auto px-6 py-8">
+        {tab === "bookings" && <BookingsList token={token} onLogout={handleLogout} />}
         {tab === "leads" && <LeadsList token={token} onLogout={handleLogout} />}
+        {tab === "availability" && <AvailabilityTab token={token} onLogout={handleLogout} />}
         {tab === "account" && (
           <AccountTab token={token} currentUsername={username} onChanged={handleCredentialsChanged} />
         )}

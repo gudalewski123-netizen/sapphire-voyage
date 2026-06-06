@@ -12,7 +12,9 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.ADMIN_API_KEY;
 export interface JwtPayload {
   userId: number;
   email: string;
-  businessName: string;
+  name?: string;
+  phone?: string;
+  businessName?: string;
 }
 
 export interface AdminSessionPayload {

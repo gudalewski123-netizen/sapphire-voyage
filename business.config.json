@@ -1,11 +1,11 @@
 {
-  "businessName": "[Business Name]",
-  "tagline": "[One-line tagline]",
-  "email": "[client@example.com]",
-  "phone": "[(555) 555-5555]",
-  "address": "[123 Main St, City, ST 12345]",
+  "businessName": "Sapphire Voyage",
+  "tagline": "Premium Private Transportation — San Juan, Puerto Rico",
+  "email": "gudalewski123@gmail.com",
+  "phone": "(787) 555-0123",
+  "address": "San Juan, Puerto Rico",
   "tradeType": "general",
   "domain": "",
-  "primaryColor": "#000000",
-  "leadNotifyTo": "teddy.nk28@gmail.com"
+  "primaryColor": "#1B5FD9",
+  "leadNotifyTo": "gudalewski123@gmail.com"
 }

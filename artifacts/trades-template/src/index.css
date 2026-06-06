@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@400;500;600;700&family=Audiowide&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -26,50 +26,50 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
 
   --font-sans: var(--app-font-sans);
-  --font-condensed: var(--app-font-condensed);
+  --font-condensed: var(--app-font-display);
+  --font-display: var(--app-font-display);
 }
 
 :root {
-  --background: 215 35% 8%; /* deep ocean navy */
-  --foreground: 35 30% 96%; /* warm off-white */
+  --background: 222 47% 7%;   /* midnight navy */
+  --foreground: 210 40% 96%;  /* cool white */
 
-  --card: 215 28% 13%; /* navy card */
-  --card-foreground: 35 30% 96%;
-  --card-border: 180 35% 30%;
+  --card: 222 40% 11%;        /* deep navy panel */
+  --card-foreground: 210 40% 96%;
+  --card-border: 219 60% 32%;
 
-  --primary: 8 88% 58%; /* Miami sunset coral */
+  --primary: 219 84% 52%;     /* sapphire blue */
   --primary-foreground: 0 0% 100%;
 
-  --muted: 215 28% 13%;
-  --muted-foreground: 35 15% 70%;
+  --muted: 222 30% 14%;
+  --muted-foreground: 215 25% 72%;
 
-  --accent: 175 75% 50%; /* turquoise teal */
-  --accent-foreground: 215 35% 8%;
+  --accent: 41 86% 62%;       /* champagne gold */
+  --accent-foreground: 222 47% 7%;
 
-  --border: 215 25% 20%;
-  --input: 215 25% 20%;
-  --ring: 8 88% 58%;
+  --border: 219 28% 20%;
+  --input: 219 28% 20%;
+  --ring: 219 84% 52%;
 
-  --app-font-sans: 'Barlow', sans-serif;
-  --app-font-condensed: 'Barlow Condensed', sans-serif;
-  --app-font-display: 'Audiowide', 'Barlow Condensed', sans-serif;
+  --app-font-sans: 'Inter', sans-serif;
+  --app-font-display: 'Playfair Display', serif;
 }
 
 .dark {
-  --background: 215 35% 8%;
-  --foreground: 35 30% 96%;
-  --card: 215 28% 13%;
-  --card-foreground: 35 30% 96%;
-  --card-border: 180 35% 30%;
-  --primary: 8 88% 58%;
+  --background: 222 47% 7%;
+  --foreground: 210 40% 96%;
+  --card: 222 40% 11%;
+  --card-foreground: 210 40% 96%;
+  --card-border: 219 60% 32%;
+  --primary: 219 84% 52%;
   --primary-foreground: 0 0% 100%;
-  --muted: 215 28% 13%;
-  --muted-foreground: 35 15% 70%;
-  --accent: 175 75% 50%;
-  --accent-foreground: 215 35% 8%;
-  --border: 215 25% 20%;
-  --input: 215 25% 20%;
-  --ring: 8 88% 58%;
+  --muted: 222 30% 14%;
+  --muted-foreground: 215 25% 72%;
+  --accent: 41 86% 62%;
+  --accent-foreground: 222 47% 7%;
+  --border: 219 28% 20%;
+  --input: 219 28% 20%;
+  --ring: 219 84% 52%;
 }
 
 @layer base {
@@ -80,6 +80,36 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-condensed tracking-wide uppercase;
+    @apply font-display tracking-tight;
   }
 }
+
+/* Subtle gold accent helper */
+.text-gold { color: hsl(var(--accent)); }
+
+/* react-day-picker — dark sapphire theme */
+.rdp-wrap {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-accent-background-color: hsl(var(--primary));
+  --rdp-day-height: 2.5rem;
+  --rdp-day-width: 2.5rem;
+  --rdp-day_button-height: 2.25rem;
+  --rdp-day_button-width: 2.25rem;
+  --rdp-today-color: hsl(var(--accent));
+  --rdp-outside-opacity: 0.35;
+  color: hsl(var(--foreground));
+}
+.rdp-wrap .rdp-root { --rdp-accent-color: hsl(var(--primary)); }
+.rdp-wrap .rdp-day_button:hover:not([disabled]) {
+  background-color: hsl(var(--primary) / 0.2);
+  border-radius: 0.5rem;
+}
+.rdp-wrap .rdp-selected .rdp-day_button {
+  background-color: hsl(var(--primary));
+  color: #fff;
+  border-radius: 0.5rem;
+}
+.rdp-wrap .rdp-disabled { opacity: 0.25; }
+.rdp-wrap .rdp-chevron { fill: hsl(var(--primary)); }
+.rdp-wrap .rdp-caption_label,
+.rdp-wrap .rdp-weekday { color: hsl(var(--muted-foreground)); }

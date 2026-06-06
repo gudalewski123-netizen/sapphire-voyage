@@ -66,6 +66,14 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    // Dev-only: forward API calls to the local Express server. No effect on the
+    // production build (Vercel proxies /api via vercel.json).
+    proxy: {
+      "/api": {
+        target: process.env.API_PROXY_TARGET || "http://localhost:10000",
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port,

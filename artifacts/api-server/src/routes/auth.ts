@@ -7,10 +7,19 @@ import type { Request, Response } from "express";
 
 const router: IRouter = Router();
 
+function cookieOpts() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+}
+
 router.post("/auth/register", async (req: Request, res: Response): Promise<void> => {
-  const { email, password, businessName } = req.body;
-  if (!email || !password || !businessName) {
-    res.status(400).json({ error: "Email, password, and business name are required" });
+  const { name, email, phone, password } = req.body ?? {};
+  if (!name || !email || !phone || !password) {
+    res.status(400).json({ error: "Name, email, phone, and password are required" });
     return;
   }
   if (typeof password !== "string" || password.length < 6) {
@@ -28,23 +37,19 @@ router.post("/auth/register", async (req: Request, res: Response): Promise<void>
   const [user] = await db.insert(usersTable).values({
     email: email.toLowerCase(),
     passwordHash,
-    businessName,
+    name: String(name).trim(),
+    phone: String(phone).trim(),
   }).returning();
 
-  const token = signToken({ userId: user.id, email: user.email, businessName: user.businessName });
-  res.cookie("auth_token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  const token = signToken({ userId: user.id, email: user.email, name: user.name ?? undefined, phone: user.phone ?? undefined });
+  res.cookie("auth_token", token, cookieOpts());
 
-  req.log.info({ userId: user.id }, "User registered");
-  res.status(201).json({ id: user.id, email: user.email, businessName: user.businessName });
+  req.log.info({ userId: user.id }, "Customer registered");
+  res.status(201).json({ id: user.id, email: user.email, name: user.name, phone: user.phone });
 });
 
 router.post("/auth/login", async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+  const { email, password } = req.body ?? {};
   if (!email || !password) {
     res.status(400).json({ error: "Email and password are required" });
     return;
@@ -62,16 +67,11 @@ router.post("/auth/login", async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
-  const token = signToken({ userId: user.id, email: user.email, businessName: user.businessName });
-  res.cookie("auth_token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  const token = signToken({ userId: user.id, email: user.email, name: user.name ?? undefined, phone: user.phone ?? undefined });
+  res.cookie("auth_token", token, cookieOpts());
 
-  req.log.info({ userId: user.id }, "User logged in");
-  res.json({ id: user.id, email: user.email, businessName: user.businessName });
+  req.log.info({ userId: user.id }, "Customer logged in");
+  res.json({ id: user.id, email: user.email, name: user.name, phone: user.phone });
 });
 
 router.post("/auth/logout", (_req: Request, res: Response): void => {

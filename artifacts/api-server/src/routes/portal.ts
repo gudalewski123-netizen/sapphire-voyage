@@ -17,7 +17,8 @@ async function notifyByEmail(request: {
   pricingNotes: string | null;
   photoNotes: string | null;
   promptText: string | null;
-}, user: { email: string; businessName: string }) {
+}, user: { email: string; businessName?: string | null; name?: string | null }) {
+  const who = user.businessName || user.name || user.email;
   try {
     let message = "";
 
@@ -36,11 +37,11 @@ async function notifyByEmail(request: {
 
     const subject =
       request.requestType === "structured"
-        ? `[Portal] Quick Update Request from ${user.businessName}`
-        : `[Portal] Custom Request from ${user.businessName}`;
+        ? `[Portal] Quick Update Request from ${who}`
+        : `[Portal] Custom Request from ${who}`;
 
     const body =
-      `Client: ${user.businessName} (${user.email})\n` +
+      `Client: ${who} (${user.email})\n` +
       `Request ID: #${request.id}\n` +
       `Type: ${request.requestType === "structured" ? "Quick Update" : "Custom Request"}\n\n` +
       `---\n\n${message}`;

@@ -1,13 +1,13 @@
 services:
   - type: web
-    name: api-server
+    name: sapphire-voyage-api
     runtime: node
     plan: free
     region: oregon
     branch: main
     buildCommand: "corepack enable && NODE_ENV=development pnpm install --no-frozen-lockfile && pnpm --filter @workspace/db run push && pnpm --filter @workspace/api-server run build"
     startCommand: "pnpm --filter @workspace/api-server run start"
-    healthCheckPath: /api/health
+    healthCheckPath: /api/healthz
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,7 +16,7 @@ services:
       - key: ALLOWED_ORIGINS
         sync: false
       - key: LEAD_NOTIFY_TO
-        value: teddy.nk28@gmail.com
+        value: gudalewski123@gmail.com
       - key: JWT_SECRET
         generateValue: true
       - key: SESSION_SECRET

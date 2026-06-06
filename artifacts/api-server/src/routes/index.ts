@@ -4,6 +4,7 @@ import authRouter from "./auth";
 import portalRouter from "./portal";
 import adminRouter from "./admin";
 import leadsRouter from "./leads";
+import bookingsRouter from "./bookings";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(authRouter);
 router.use(portalRouter);
 router.use(adminRouter);
 router.use(leadsRouter);
+router.use(bookingsRouter);
 
 export default router;
