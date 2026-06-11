@@ -12,6 +12,7 @@ import { LanguageProvider, useLang } from "./i18n";
 import { AuthProvider } from "./auth";
 import { Nav, Footer, useApplyTheme } from "./components/chrome";
 import AdminPage from "./pages/AdminPage";
+import { BlogIndex, BlogPost } from "./pages/blog";
 import BookingPage from "./pages/BookingPage";
 import AccountPage from "./pages/AccountPage";
 
@@ -353,6 +354,8 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/book" component={BookingPage} />
       <Route path="/account" component={AccountPage} />
+      <Route path="/blog" component={BlogIndex} />
+      <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/admin" component={AdminPage} />
     </Switch>
   );
