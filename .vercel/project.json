@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_o8yVSuSUkMPVit1CZQA1yMoWIxOv",
+  "orgId": "team_JJsO6rfcfguriDOKqCttwD4U",
+  "projectName": "sapphire-voyage",
+  "settings": {
+    "createdAt": 1780764909231,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": "pnpm install --no-frozen-lockfile",
+    "buildCommand": null,
+    "outputDirectory": "dist/public",
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}
